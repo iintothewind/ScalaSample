@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SBT: org.scala-lang:scala-actors-migration_2.11:1.1.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-actors-migration_2.11/jars/scala-actors-migration_2.11-1.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
