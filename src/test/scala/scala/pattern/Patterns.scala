@@ -211,6 +211,8 @@ class Patterns {
     val second: PartialFunction[List[Int], Int] = {
       case x :: y :: _ => y
     }
+    // scala.MatchError: List(1) (of class scala.collection.immutable.$colon$colon)
+    // second(List(1))
     assert(second.isDefinedAt(List(1, 2, 3)))
     assert(!second.isDefinedAt(List(1)))
     assert(!second.isDefinedAt(Nil))

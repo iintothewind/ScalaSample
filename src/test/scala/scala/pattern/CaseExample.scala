@@ -67,4 +67,22 @@ class CaseExample {
     // use caseClass.copy() to create a copy and change the properties
     this.ageMatcher(bill.copy(name = "Sam", age = 30))
   }
+
+  type Peg = String
+  type Move = (String, String)
+
+  def hanoi(n: Int, left: Peg, right: Peg, temp: Peg): List[Move] = n match {
+    case i if i < 1 => List.empty
+    case i if i == 1 => List((left, right))
+    case i if i > 1 => hanoi(i - 1, left, temp, right) ++ hanoi(1, left, right, temp) ++ hanoi(i - 1, temp, right, left)
+  }
+
+  @Test
+  def testHanoi(): Unit = {
+    assert(List.empty[Move] == hanoi(-1, "a", "b", "c"))
+    assert(List.empty[Move] == hanoi(0, "a", "b", "c"))
+    assert(List(("a", "b")) == hanoi(1, "a", "b", "c"))
+    assert(List(("a", "c"), ("a", "b"), ("c", "b")) == hanoi(2, "a", "b", "c"))
+    assert(List(("a", "b"), ("a", "c"), ("b", "c"), ("a", "b"), ("c", "a"), ("c", "b"), ("a", "b")) == hanoi(3, "a", "b", "c"))
+  }
 }

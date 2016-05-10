@@ -8,6 +8,7 @@ lib_managed/
 src_managed/
 project/boot/
 .history
+.idea/*
 .cache
 ### Scala template
 *.class
