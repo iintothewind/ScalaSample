@@ -24,7 +24,8 @@ object Hof {
     fibTail(n, 0, 1)
   }
 
-  def findFirst[A](as: Seq[A], p: A => Boolean): Int = {
+  // use curry to improve the type inference
+  def findFirst[A](as: Seq[A])(p: A => Boolean): Int = {
     @tailrec
     def find(n: Int): Int =
       if (n >= as.length) -1
@@ -33,7 +34,8 @@ object Hof {
     find(0)
   }
 
-  def isSorted[A](as: Seq[A], ordered: (A, A) => Boolean): Boolean = {
+  // use curry to improve the type inference
+  def isSorted[A](as: Seq[A])(ordered: (A, A) => Boolean): Boolean = {
     as.zip(as.sortWith(ordered)).forall(pair => pair._1 == pair._2)
   }
 
@@ -71,11 +73,11 @@ class HofSample {
 
   @Test
   def testFindFirst(): Unit = {
-    assert(0 == Hof.findFirst(Array("apple", "pear", "orange"), (s: String) => s.contains("pp")))
+    assert(0 == Hof.findFirst(Array("apple", "pear", "orange"))(_.contains("pp")))
   }
 
   @Test
   def testIsSorted(): Unit = {
-    assert(Hof.isSorted(Seq(1, 2, 3, 4, 5), (left: Int, right: Int) => left < right))
+    assert(Hof.isSorted(Seq(1, 2, 3, 4, 5))(_ < _))
   }
 }

@@ -28,8 +28,8 @@ object Cafe {
     (cafe, Charge(cc, cafe.price))
   }
 
-  def buyCoffees(cc: CreditCard, n: Int): (List[Coffee], Charge) = {
-    val purchases = List.fill(n)(buyCoffee(cc))
+  def buyCoffees(cc: CreditCard, n: Int): (Seq[Coffee], Charge) = {
+    val purchases = Seq.fill(n)(buyCoffee(cc))
     val (coffees, charges) = purchases.unzip
     (coffees, charges.reduce((c1, c2) => c1.combine(c2)))
   }
@@ -43,7 +43,7 @@ class CafeSample {
 
   @Test
   def testBuyCoffees(): Unit = {
-    assert((List.fill(9)(Coffee()), Charge(CreditCard(99), Coffee().price * 9)) == Cafe.buyCoffees(CreditCard(99), 9))
+    assert((Seq.fill(9)(Coffee()), Charge(CreditCard(99), Coffee().price * 9)) == Cafe.buyCoffees(CreditCard(99), 9))
   }
 
 }
