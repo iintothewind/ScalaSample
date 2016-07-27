@@ -4,60 +4,68 @@ import org.junit.Test
 
 import scala.annotation.tailrec
 
-sealed trait List[+A] {
+sealed trait Lst[+A] {
   def head(): A
 
-  def tail(): List[A]
+  def tail(): Lst[A]
 
-  def init(): List[A]
+  def init(): Lst[A]
 
-  def ::[B >: A](x: B): List[B]
+  def ::[B >: A](x: B): Lst[B]
 
-  def :::[B >: A](nxs: List[B]): List[B]
+  def :::[B >: A](nxs: Lst[B]): Lst[B]
 
   def isEmpty: Boolean
 
   def length: Int
 
-  def setHead[B >: A](newHead: B): List[B]
+  def setHead[B >: A](newHead: B): Lst[B]
 
-  def drop(n: Int): List[A]
+  def drop(n: Int): Lst[A]
 
-  def dropWhile[B >: A](f: B => Boolean): List[B]
+  def dropWhile[B >: A](f: B => Boolean): Lst[B]
 
-  def foldLeft[U >: A, B](z: B)(f: (B, U) => B): B
+  def foldLeft[B](z: B)(f: (B, A) => B): B
 
-  def foldRight[U >: A, B](z: B)(f: (U, B) => B): B
+  def foldRight[B](z: B)(f: (A, B) => B): B
 
-  def reverse: List[A]
+  def reverse: Lst[A]
 
-  def map[B](f: A => B): List[B]
+  def map[B](f: A => B): Lst[B]
 
-  def flatMap[B](f: A => List[B]): List[B]
+  def flatMap[B](f: A => Lst[B]): Lst[B]
 
-  def filter(f: A => Boolean): List[A]
+  def filter(f: A => Boolean): Lst[A]
 
   def foreach[B](f: A => B): Unit
 
-  def zip[B](bs: List[B]): List[(A, B)]
+  def zip[B](bs: Lst[B]): Lst[(A, B)]
 
-  def zipWithIndex: List[(A, Int)]
+  def zipWithIndex: Lst[(A, Int)]
 
-  def take(n: Int): List[A]
+  def take(n: Int): Lst[A]
 
-  def takeWhile(p: A => Boolean): List[A]
+  def takeWhile(p: A => Boolean): Lst[A]
+
+  def find(p: A => Boolean): Option[A]
+
+  def exists(p: A => Boolean): Boolean
+
+  def forall(p: A => Boolean): Boolean
+
+  def contains[U >: A](sub: Lst[U]): Boolean
 }
 
-case object Nil extends List[Nothing] {
+case object Nls extends Lst[Nothing] {
   override def head(): Nothing = throw new UnsupportedOperationException("head of empty list")
 
   override def tail(): Nothing = throw new UnsupportedOperationException("tail of empty list")
 
-  override def init(): List[Nothing] = throw new UnsupportedOperationException("init of empty list")
+  override def init(): Lst[Nothing] = throw new UnsupportedOperationException("init of empty list")
 
-  override def ::[B >: Nothing](x: B): List[B] = Cons(x, this)
+  override def ::[B >: Nothing](x: B): Lst[B] = Cons(x, this)
 
-  override def :::[B >: Nothing](nxs: List[B]): List[B] = nxs
+  override def :::[B >: Nothing](nxs: Lst[B]): Lst[B] = nxs
 
   override def toString: String = ""
 
@@ -65,54 +73,62 @@ case object Nil extends List[Nothing] {
 
   override def length: Int = 0
 
-  override def setHead[B >: Nothing](newHead: B): List[B] = Cons(newHead, Nil)
+  override def setHead[B >: Nothing](newHead: B): Lst[B] = Cons(newHead, Nls)
 
-  override def drop(n: Int): List[Nothing] = this
+  override def drop(n: Int): Lst[Nothing] = this
 
-  override def dropWhile[B >: Nothing](f: (B) => Boolean): List[B] = this
+  override def dropWhile[B >: Nothing](f: (B) => Boolean): Lst[B] = this
 
-  override def foldLeft[U >: Nothing, B](z: B)(f: (B, U) => B): B = z
+  override def foldLeft[B](z: B)(f: (B, Nothing) => B): B = z
 
-  override def foldRight[U >: Nothing, B](z: B)(f: (U, B) => B): B = z
+  override def foldRight[B](z: B)(f: (Nothing, B) => B): B = z
 
-  override def reverse: List[Nothing] = this
+  override def reverse: Lst[Nothing] = this
 
-  override def map[B](f: (Nothing) => B): List[B] = this
+  override def map[B](f: (Nothing) => B): Lst[B] = this
 
-  override def flatMap[B](f: (Nothing) => List[B]): List[B] = this
+  override def flatMap[B](f: (Nothing) => Lst[B]): Lst[B] = this
 
-  override def filter(f: (Nothing) => Boolean): List[Nothing] = this
+  override def filter(f: (Nothing) => Boolean): Lst[Nothing] = this
 
   override def foreach[B](f: (Nothing) => B): Unit = Unit.asInstanceOf[B]
 
-  override def zip[B](bs: List[B]): List[(Nothing, B)] = this
+  override def zip[B](bs: Lst[B]): Lst[(Nothing, B)] = this
 
-  override def zipWithIndex: List[(Nothing, Int)] = this
+  override def zipWithIndex: Lst[(Nothing, Int)] = this
 
-  override def take(n: Int): List[Nothing] = this
+  override def take(n: Int): Lst[Nothing] = this
 
-  override def takeWhile(p: (Nothing) => Boolean): List[Nothing] = this
+  override def takeWhile(p: (Nothing) => Boolean): Lst[Nothing] = this
+
+  override def find(p: (Nothing) => Boolean): Option[Nothing] = None
+
+  override def exists(p: (Nothing) => Boolean): Boolean = false
+
+  override def forall(p: (Nothing) => Boolean): Boolean = false
+
+  override def contains[U >: Nothing](sub: Lst[U]): Boolean = if (Nls == sub) true else false
 }
 
 
-case class Cons[+A](x: A, xs: List[A]) extends List[A] {
+case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def head(): A = this.x
 
-  override def tail(): List[A] = this.xs
+  override def tail(): Lst[A] = this.xs
 
-  override def init(): List[A] = xs match {
-    case Nil => Nil
-    case Cons(rx, Nil) => Cons(x, Nil)
+  override def init(): Lst[A] = xs match {
+    case Nls => Nls
+    case Cons(rx, Nls) => Cons(x, Nls)
     case _ => Cons(x, xs.init())
   }
 
-  override def ::[B >: A](x: B): List[B] = Cons(x, this)
+  override def ::[B >: A](x: B): Lst[B] = Cons(x, this)
 
   //  override def :::[B >: A](nxs: List[B]): List[B] = xs match {
-  //    case Nil => Cons(x, nxs)
+  //    case Nls => Cons(x, nxs)
   //    case Cons(rx, rs: List[B]) => Cons(x, Cons(rx, rs ::: nxs))
   //  }
-  override def :::[B >: A](nxs: List[B]): List[B] = nxs.foldRight(this.asInstanceOf[List[B]])(Cons(_, _))
+  override def :::[B >: A](nxs: Lst[B]): Lst[B] = nxs.foldRight(this.asInstanceOf[Lst[B]])(Cons(_, _))
 
   override def toString: String = x.toString + ", " + xs.toString
 
@@ -121,7 +137,7 @@ case class Cons[+A](x: A, xs: List[A]) extends List[A] {
   //  override def length: Int = {
   //    @tailrec
   //    def loop(len: Int, as: List[A]): Int = as match {
-  //      case Nil => len
+  //      case Nls => len
   //      case Cons(a, rs) => loop(len + 1, rs)
   //    }
   //    loop(0, this)
@@ -129,22 +145,22 @@ case class Cons[+A](x: A, xs: List[A]) extends List[A] {
 
   override def length: Int = foldLeft(0)((n, _) => n + 1)
 
-  override def setHead[B >: A](newHead: B): List[B] = Cons(newHead, this.xs)
+  override def setHead[B >: A](newHead: B): Lst[B] = Cons(newHead, this.xs)
 
-  override def drop(n: Int): List[A] = {
+  override def drop(n: Int): Lst[A] = {
     @tailrec
-    def loop(i: Int, l: List[A]): List[A] = l match {
-      case Nil => Nil
+    def loop(i: Int, l: Lst[A]): Lst[A] = l match {
+      case Nls => Nls
       case Cons(a, rs) if i > 0 => loop(i - 1, rs)
       case _ => l
     }
     loop(n, this)
   }
 
-  override def dropWhile[B >: A](f: (B) => Boolean): List[B] = {
+  override def dropWhile[B >: A](f: (B) => Boolean): Lst[B] = {
     @tailrec
-    def loop[U >: A](l: List[U])(f: (U) => Boolean): List[U] = l match {
-      case Nil => Nil
+    def loop[U >: A](l: Lst[U])(f: (U) => Boolean): Lst[U] = l match {
+      case Nls => Nls
       case Cons(a, rs) if f(a) => loop(rs)(f)
       case _ => l
     }
@@ -153,90 +169,124 @@ case class Cons[+A](x: A, xs: List[A]) extends List[A] {
 
   //override def foldLeft[U >: A, B](z: B)(f: (B, U) => B): B = xs.foldLeft(f(z, x))(f)
 
-  override def foldLeft[U >: A, B](z: B)(f: (B, U) => B): B = {
+  override def foldLeft[B](z: B)(f: (B, A) => B): B = {
     @tailrec
-    def loop(as: List[U], z: B)(f: (B, U) => B): B = as match {
-      case Nil => z
+    def loop(as: Lst[A], z: B)(f: (B, A) => B): B = as match {
+      case Nls => z
       case Cons(a, rs) => loop(rs, f(z, a))(f)
     }
     loop(this, z)(f)
   }
 
-  override def reverse: List[A] = foldLeft(List[A]())(_.::(_))
+  override def reverse: Lst[A] = foldLeft(Lst[A]())(_.::(_))
 
   //override def foldRight[U >: A, B](z: B)(f: (U, B) => B): B = f(x, xs.foldRight(z)(f))
 
-  override def foldRight[U >: A, B](z: B)(f: (U, B) => B): B = this.reverse.foldLeft(z)((b, u) => f(u, b)) //less performance but stack safe
+  override def foldRight[B](z: B)(f: (A, B) => B): B = this.reverse.foldLeft(z)((b, u) => f(u, b)) //less performance but stack safe
 
-  override def map[B](f: (A) => B): List[B] = this.foldRight(List[B]())((element, list) => f(element) :: list)
+  override def map[B](f: (A) => B): Lst[B] = this.foldRight(Lst[B]())((element, list) => f(element) :: list)
 
-  override def flatMap[B](f: (A) => List[B]): List[B] = this.foldLeft(List[B]())((list, element) => list ::: f(element))
+  override def flatMap[B](f: (A) => Lst[B]): Lst[B] = this.foldLeft(Lst[B]())((list, element) => list ::: f(element))
 
-  override def filter(f: (A) => Boolean): List[A] = this.flatMap(x => if (f(x)) List(x) else Nil)
+  override def filter(f: (A) => Boolean): Lst[A] = this.flatMap(x => if (f(x)) Lst(x) else Nls)
 
   override def foreach[B](f: (A) => B): Unit = this.foldLeft(Unit.asInstanceOf[B])((_, x) => f(x))
 
-  override def zip[B](bs: List[B]): List[(A, B)] = {
+  override def zip[B](bs: Lst[B]): Lst[(A, B)] = {
     @tailrec
-    def loop(zipped: List[(A, B)], ps: (List[A], List[B])): List[(A, B)] = ps match {
-      case (Nil, Cons(_, _)) | (Cons(_, _), Nil) | (Nil, Nil) => zipped
-      case (Cons(a, ars), Cons(b, brs)) => loop((a, b) :: zipped, (ars, brs))
+    def loop(zipped: Lst[(A, B)], as: Lst[A], bs: Lst[B]): Lst[(A, B)] = (as, bs) match {
+      case (Nls, Nls) | (Nls, Cons(_, _)) | (Cons(_, _), Nls) => zipped
+      case (Cons(a, ars), Cons(b, brs)) => loop((a, b) :: zipped, ars, brs)
     }
-    loop(Nil, (this, bs)).reverse
+    loop(Nls, this, bs).reverse
   }
 
-  override def zipWithIndex: List[(A, Int)] = {
+  override def zipWithIndex: Lst[(A, Int)] = {
     @tailrec
-    def loop(zipped: List[(A, Int)], i: Int, xs: List[A]): List[(A, Int)] = xs match {
-      case Nil => zipped
+    def loop(zipped: Lst[(A, Int)], i: Int, xs: Lst[A]): Lst[(A, Int)] = xs match {
+      case Nls => zipped
       case Cons(a, rs) => loop((a, i) :: zipped, i + 1, rs)
     }
-    loop(Nil, 0, this).reverse
+    loop(Nls, 0, this).reverse
   }
 
-  override def take(n: Int): List[A] = {
+  override def take(n: Int): Lst[A] = {
     @tailrec
-    def loop(i: Int, taken: List[A], as: List[A]): List[A] = as match {
-      case Nil => taken
+    def loop(i: Int, taken: Lst[A], as: Lst[A]): Lst[A] = as match {
+      case Nls => taken
       case Cons(a, rs) if i > 0 => loop(i - 1, a :: taken, rs)
       case _ => taken
     }
-    loop(n, Nil, this).reverse
+    loop(n, Nls, this).reverse
   }
 
-  override def takeWhile(p: (A) => Boolean): List[A] = {
+  override def takeWhile(p: (A) => Boolean): Lst[A] = {
     @tailrec
-    def loop(taken: List[A], as: List[A])(p: A => Boolean): List[A] = as match {
-      case Nil => taken
+    def loop(taken: Lst[A], as: Lst[A])(p: A => Boolean): Lst[A] = as match {
+      case Nls => taken
       case Cons(a, rs) if p(a) => loop(a :: taken, rs)(p)
       case _ => taken
     }
-    loop(Nil, this)(p).reverse
+    loop(Nls, this)(p).reverse
+  }
+
+  override def find(p: (A) => Boolean): Option[A] = {
+    @tailrec
+    def loop(as: Lst[A])(p: A => Boolean): Option[A] = as match {
+      case Nls => None
+      case Cons(a, rs) if p(a) => Some(a)
+      case Cons(a, rs) if !p(a) => loop(rs)(p)
+    }
+    loop(this)(p)
+  }
+
+  override def exists(p: (A) => Boolean): Boolean = this.find(p).nonEmpty
+
+  override def forall(p: (A) => Boolean): Boolean = {
+    @tailrec
+    def loop(as: Lst[A])(p: A => Boolean): Boolean = as match {
+      case Nls => false
+      case Cons(a, _) if !p(a) => false
+      case Cons(a, Nls) if p(a) => true
+      case Cons(a, rs) if p(a) => loop(rs)(p)
+    }
+    loop(this)(p)
+  }
+
+  override def contains[U >: A](sub: Lst[U]): Boolean = {
+    @tailrec
+    def loop(as: Lst[A], sub: Lst[U]): Boolean = as match {
+      case Nls => false
+      case l@Cons(_, _) if sub.length > l.length => false
+      case l@Cons(_, _) if l.take(sub.length) == sub => true
+      case _ => loop(as.drop(1), sub)
+    }
+    loop(this, sub)
   }
 }
 
-object List {
-  def sum(ints: List[Int]): Int = ints.foldLeft(0)(_ + _)
+object Lst {
+  def sum(ints: Lst[Int]): Int = ints.foldLeft(0)(_ + _)
 
-  def product(ds: List[Double]): Double = ds.foldLeft(1.0D)(_ * _)
+  def product(ds: Lst[Double]): Double = ds.foldLeft(1.0D)(_ * _)
 
-  def foldRight[A, B](xs: List[A], z: B)(f: (A, B) => B): B = xs match {
-    case Nil => z
+  def foldRight[A, B](xs: Lst[A], z: B)(f: (A, B) => B): B = xs match {
+    case Nls => z
     case Cons(x, rs) => f(x, foldRight(rs, z)(f)) //no tailrec, quire a failure
   }
 
-  def apply[A](as: A*): List[A] = if (as.isEmpty) Nil else Cons(as.head, apply(as.tail: _*))
+  def apply[A](as: A*): Lst[A] = if (as.isEmpty) Nls else Cons(as.head, apply(as.tail: _*))
 }
 
 
 class ListSample {
   @Test
   def testCaseMatching(): Unit = {
-    val v = List(1, 2, 3, 4, 5) match {
+    val v = Lst(1, 2, 3, 4, 5) match {
       case Cons(x, Cons(2, Cons(4, _))) => x
-      case Nil => 42
+      case Nls => 42
       case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-      case Cons(h, t) => h + List.sum(t)
+      case Cons(h, t) => h + Lst.sum(t)
       case _ => 101
     }
 
@@ -245,138 +295,172 @@ class ListSample {
 
   @Test(expected = classOf[UnsupportedOperationException])
   def testTail(): Unit = {
-    assert(List(2, 3) == List(1, 2, 3).tail())
-    Nil.tail()
+    assert(Lst(2, 3) == Lst(1, 2, 3).tail())
+    Nls.tail()
   }
 
   @Test
   def testSetHead(): Unit = {
-    assert(List(0) == Nil.setHead(0))
-    assert(List(0, 2, 3) == List(1, 2, 3).setHead(0))
+    assert(Lst(0) == Nls.setHead(0))
+    assert(Lst(0, 2, 3) == Lst(1, 2, 3).setHead(0))
   }
 
   @Test
   def testLength(): Unit = {
-    assert(0 == Nil.length)
-    assert(1 == List(0).length)
-    assert(3 == List(0, 1, 2).length)
+    assert(0 == Nls.length)
+    assert(1 == Lst(0).length)
+    assert(3 == Lst(0, 1, 2).length)
   }
 
   @Test
   def testDrop(): Unit = {
-    assert(List(1, 2, 3) == List(1, 2, 3).drop(0))
-    assert(List(2, 3) == List(1, 2, 3).drop(1))
-    assert(Nil == List(1, 2, 3).drop(9))
-    assert(Nil == Nil.drop(1))
+    assert(Lst(1, 2, 3) == Lst(1, 2, 3).drop(0))
+    assert(Lst(2, 3) == Lst(1, 2, 3).drop(1))
+    assert(Nls == Lst(1, 2, 3).drop(9))
+    assert(Nls == Nls.drop(1))
   }
 
   @Test
   def testDropWhile(): Unit = {
-    assert(List(3) == List(1, 2, 3).dropWhile(_ < 3))
-    assert(Nil == List(1, 2, 3).dropWhile(_ > 0))
-    assert(Nil == Nil.dropWhile[String](_.nonEmpty))
+    assert(Lst(3) == Lst(1, 2, 3).dropWhile(_ < 3))
+    assert(Nls == Lst(1, 2, 3).dropWhile(_ > 0))
+    assert(Nls == Nls.dropWhile[String](_.nonEmpty))
   }
 
 
   @Test
   def testCons(): Unit = {
-    assert(List(1, 2, 3) == 1 :: 2 :: 3 :: Nil)
+    assert(Lst(1, 2, 3) == 1 :: 2 :: 3 :: Nls)
   }
 
   @Test
   def testAppend(): Unit = {
-    assert(List(1, 2, 3) == Nil ::: List(1, 2, 3))
-    assert(List(1, 2, 3) == List(1, 2, 3) ::: Nil)
-    assert(List(4, 6, 6, 1, 2, 3) == List(4, 6, 6) ::: List(1, 2, 3))
+    assert(Lst(1, 2, 3) == Nls ::: Lst(1, 2, 3))
+    assert(Lst(1, 2, 3) == Lst(1, 2, 3) ::: Nls)
+    assert(Lst(4, 6, 6, 1, 2, 3) == Lst(4, 6, 6) ::: Lst(1, 2, 3))
   }
 
   @Test(expected = classOf[UnsupportedOperationException])
   def testInit(): Unit = {
-    assert(List(1, 2) == List(1, 2, 3).init())
-    assert(List(1) == List(1, 2).init())
-    assert(Nil == List(1).init())
-    assert(Nil == Nil.init())
+    assert(Lst(1, 2) == Lst(1, 2, 3).init())
+    assert(Lst(1) == Lst(1, 2).init())
+    assert(Nls == Lst(1).init())
+    assert(Nls == Nls.init())
   }
 
   @Test
   def testFoldLeft(): Unit = {
-    assert(1 == Nil.foldLeft[Int,Int](1)(_+_))
-    assert(6 == List(1, 2, 3).foldLeft(1)(_ * _))
-    assert(List(3, 2, 1) == List(1, 2, 3).foldLeft(Nil: List[Int])((lst, itm) => Cons(itm, lst)))
+    assert(1 == Nls.foldLeft[Int](1)(_+_.asInstanceOf[Int]))
+    assert(6 == Lst(1, 2, 3).foldLeft(1)(_ * _))
+    assert(Lst(3, 2, 1) == Lst(1, 2, 3).foldLeft(Nls: Lst[Int])((lst, itm) => Cons(itm, lst)))
   }
 
   @Test
   def testFoldRight(): Unit = {
-    assert(0 == Nil.foldRight[Int,Int](0)(_+_))
-    assert(6 == List(1, 2, 3).foldRight(0)(_ + _))
-    assert(List(1, 2, 3) == List(1, 2, 3).foldRight(Nil: List[Int])(Cons(_, _)))
-    assert(List(1, 2, 3, 7, 8, 9) == List(1, 2, 3).foldRight(List(7, 8, 9))(Cons(_, _)))
+    assert(0 == Nls.foldRight[Int](0)(_.asInstanceOf[Int]+_))
+    assert(6 == Lst(1, 2, 3).foldRight(0)(_ + _))
+    assert(Lst(1, 2, 3) == Lst(1, 2, 3).foldRight(Nls: Lst[Int])(Cons(_, _)))
+    assert(Lst(1, 2, 3, 7, 8, 9) == Lst(1, 2, 3).foldRight(Lst(7, 8, 9))(Cons(_, _)))
   }
 
   @Test
   def testAddingOne(): Unit = {
-    assert(List(2, 3, 4) == List(1, 2, 3).reverse.foldLeft(List[Int]())((list, element) => (element + 1) :: list))
+    assert(Lst(2, 3, 4) == Lst(1, 2, 3).reverse.foldLeft(Lst[Int]())((list, element) => (element + 1) :: list))
   }
 
   @Test
   def testDblToString(): Unit = {
-    assert(List("0.001", "3.1415", "1.11926") == List(0.001D, 3.1415D, 1.11926D).reverse.foldLeft(List[String]())((list, element) => element.toString :: list))
+    assert(Lst("0.001", "3.1415", "1.11926") == Lst(0.001D, 3.1415D, 1.11926D).reverse.foldLeft(Lst[String]())((list, element) => element.toString :: list))
   }
 
   @Test
   def testMap(): Unit = {
-    assert(List("1", "2", "3") == List(1, 2, 3).map(_.toString))
+    assert(Lst("1", "2", "3") == Lst(1, 2, 3).map(_.toString))
   }
 
   @Test
   def testFlapMap(): Unit = {
-    assert(List(1, 1, 2, 2, 3, 3) == List(1, 2, 3).flatMap(element => List(element, element)))
+    assert(Lst(1, 1, 2, 2, 3, 3) == Lst(1, 2, 3).flatMap(element => Lst(element, element)))
   }
 
   @Test
   def testFilter(): Unit = {
-    assert(List(1, 2, 3) == List(-1, 0, 1, 2, 3).flatMap(x => if (x > 0) List(x) else List[Int]()))
-    assert(List(2, 4, 6) == List(1, 2, 3, 4, 5, 6).filter(_ % 2 == 0))
+    assert(Lst(1, 2, 3) == Lst(-1, 0, 1, 2, 3).flatMap(x => if (x > 0) Lst(x) else Lst[Int]()))
+    assert(Lst(2, 4, 6) == Lst(1, 2, 3, 4, 5, 6).filter(_ % 2 == 0))
   }
 
   @Test
   def testForeach(): Unit = {
-    List(1, 2, 3).foreach(print)
+    Lst(1, 2, 3).foreach(println)
   }
 
   @Test
   def testZip(): Unit = {
-    assert(Nil == Nil.zip(Nil))
-    assert(Nil == Nil.zip(List(1, 2, 3)))
-    assert(Nil == List(1, 2, 3).zip(Nil))
-    assert(List((1, "One"), (2, "Two")) == List(1, 2, 3).zip(List("One", "Two")))
-    assert(List((1, "One"), (2, "Two")) == List(1, 2).zip(List("One", "Two", "Three")))
-    assert(List((1, "One"), (2, "Two"), (3, "Three")) == List(1, 2, 3).zip(List("One", "Two", "Three")))
+    assert(Nls == Nls.zip(Nls))
+    assert(Nls == Nls.zip(Lst(1, 2, 3)))
+    assert(Nls == Lst(1, 2, 3).zip(Nls))
+    assert(Lst((1, "One"), (2, "Two")) == Lst(1, 2, 3).zip(Lst("One", "Two")))
+    assert(Lst((1, "One"), (2, "Two")) == Lst(1, 2).zip(Lst("One", "Two", "Three")))
+    assert(Lst((1, "One"), (2, "Two"), (3, "Three")) == Lst(1, 2, 3).zip(Lst("One", "Two", "Three")))
   }
 
   @Test
   def testZipWithIndex(): Unit = {
-    assert(Nil == Nil.zipWithIndex)
-    assert(List((1, 0), (2, 1), (3, 2)) == List(1, 2, 3).zipWithIndex)
+    assert(Nls == Nls.zipWithIndex)
+    assert(Lst((1, 0), (2, 1), (3, 2)) == Lst(1, 2, 3).zipWithIndex)
   }
 
   @Test
   def testTake(): Unit = {
-    assert(Nil == Nil.take(0))
-    assert(Nil == List(1, 2).take(-1))
-    assert(Nil == List(1, 2).take(0))
-    assert(List(1) == List(1, 2).take(1))
-    assert(List(1, 2) == List(1, 2).take(2))
-    assert(List(1, 2) == List(1, 2).take(3))
+    assert(Nls == Nls.take(0))
+    assert(Nls == Lst(1, 2).take(-1))
+    assert(Nls == Lst(1, 2).take(0))
+    assert(Lst(1) == Lst(1, 2).take(1))
+    assert(Lst(1, 2) == Lst(1, 2).take(2))
+    assert(Lst(1, 2) == Lst(1, 2).take(3))
   }
 
   @Test
   def testTakeWhile(): Unit = {
-    assert(Nil == Nil.takeWhile(_.isInstanceOf[Unit]))
-    assert(Nil == List(1, 2, 3).takeWhile(_ < 1))
-    assert(List(1) == List(1, 2, 3).takeWhile(_ < 2))
-    assert(List(1, 2) == List(1, 2, 3).takeWhile(_ < 3))
+    assert(Nls == Nls.takeWhile(_.isInstanceOf[Unit]))
+    assert(Nls == Lst(1, 2, 3).takeWhile(_ < 1))
+    assert(Lst(1) == Lst(1, 2, 3).takeWhile(_ < 2))
+    assert(Lst(1, 2) == Lst(1, 2, 3).takeWhile(_ < 3))
   }
 
+  @Test
+  def testFind(): Unit = {
+    for (x <- Option(9)) {
+      println(x)
+    }
+    assert(Nls.find(_.equals(0)).isEmpty)
+    assert(Lst(1, 2, 3).find(_ < 0).isEmpty)
+    assert(Lst(1, 2, 3).find(_ > 2).isDefined)
+  }
+
+  @Test
+  def testExists(): Unit = {
+    assert(!Nls.exists(_.equals(0)))
+    assert(!Lst(1, 2, 3).exists(_ < 0))
+    assert(Lst(1, 2, 3).exists(_ > 2))
+  }
+
+  @Test
+  def testForall(): Unit = {
+    assert(!Nls.forall(_.equals(0)))
+    assert(!Lst(1, 2, 3).forall(_ == 0))
+    assert(Lst(1, 2, 3).forall(_ > 0))
+    assert(!Lst(1, 2, 3).forall(_ < 2))
+  }
+
+  @Test
+  def testContains(): Unit = {
+    assert(Nls.contains(Nls))
+    assert(!Nls.contains(Lst(1)))
+    assert(Lst(1, 2).contains(Nls))
+    assert(Lst(1, 2).contains(Lst(1)))
+    assert(Lst(1, 2).contains(Lst(1, 2)))
+    assert(!Lst(1, 2).contains(Lst(1, 2, 3)))
+  }
 
 }
