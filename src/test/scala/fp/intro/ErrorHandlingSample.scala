@@ -66,7 +66,7 @@ object Opt {
     case (Sme(a), Sme(lst)) => Sme(a :: lst)
     case _ => Non
   }).flatMap {
-    case lst@x :: rs => Sme(lst)
+    case lst@_ :: _ => Sme(lst)
     case _ => Non
   }
 }
