@@ -65,7 +65,10 @@ object Opt {
   def sequence[A](xs: List[Opt[A]]): Opt[List[A]] = xs.foldRight(Opt(List.empty[A]))((x, result) => (x, result) match {
     case (Sme(a), Sme(lst)) => Sme(a :: lst)
     case _ => Non
-  }).flatMap { lst => if (lst.nonEmpty) Sme(lst) else Non }
+  }).flatMap {
+    case lst@x :: rs => Sme(lst)
+    case _ => Non
+  }
 }
 
 
