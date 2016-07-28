@@ -105,16 +105,16 @@ class TreeSample {
 
   @Test
   def testDepth(): Unit = {
-    println(Leaf(0).depth)
-    println(Branch(Some(Leaf(0)), Some(Leaf(1))).depth)
-    println(Branch(None, Some(Branch(Some(Leaf(1)), Some(Branch(Some(Leaf(0)), Some(Leaf(1))))))).depth)
-    println(Branch(Some(Branch(Some(Leaf(1)), Some(Leaf(2)))), Some(Branch(Some(Leaf(3)), Some(Leaf(4))))).depth)
+    assert(0 == Leaf(0).depth)
+    assert(1 == Branch(Some(Leaf(0)), Some(Leaf(1))).depth)
+    assert(3 == Branch(None, Some(Branch(Some(Leaf(1)), Some(Branch(Some(Leaf(0)), Some(Leaf(1))))))).depth)
+    assert(2 == Branch(Some(Branch(Some(Leaf(1)), Some(Leaf(2)))), Some(Branch(Some(Leaf(3)), Some(Leaf(4))))).depth)
   }
 
   @Test
   def testMap(): Unit = {
-    println(Leaf(0).map(v => v + 1))
-    println(Branch(None, Some(Branch(Some(Leaf(1)), Some(Branch(Some(Leaf(0)), Some(Leaf(1))))))).map(v => v + 1))
+    assert(Leaf(1) == Leaf(0).map(v => v + 1))
+    assert(Branch(None, Some(Branch(Some(Leaf(2)), Some(Branch(Some(Leaf(1)), Some(Leaf(2))))))) == Branch(None, Some(Branch(Some(Leaf(1)), Some(Branch(Some(Leaf(0)), Some(Leaf(1))))))).map(v => v + 1))
   }
 
 }

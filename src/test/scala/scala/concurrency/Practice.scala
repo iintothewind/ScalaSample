@@ -7,7 +7,6 @@ import org.junit.{Rule, Test}
 
 import scala.actors.Actor
 import scala.actors.threadpool.TimeUnit
-import scala.io.Source
 
 /**
  * Actors should not block

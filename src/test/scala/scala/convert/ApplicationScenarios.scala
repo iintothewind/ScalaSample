@@ -2,7 +2,6 @@ package scala.convert
 
 import org.junit.Test
 
-import scala.generics.Person
 import scala.language.implicitConversions
 
 class ApplicationScenarios {

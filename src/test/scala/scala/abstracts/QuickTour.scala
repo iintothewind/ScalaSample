@@ -2,7 +2,7 @@ package scala.abstracts
 
 import java.io.File
 
-import org.junit.{ Ignore, Test }
+import org.junit.Test
 
 import scala.io.Source
 import scala.language.reflectiveCalls
@@ -247,7 +247,7 @@ class QuickTour {
    * loading uses &lt;: to define that T must be a subtype of the base type {def close():Unit}
    * therefore, closeable.close() can be used in finally block
    */
-  def loading[T <: { def close(): Unit }, S](closeable: T)(operation: T => S): S = {
+  def loading[T <: {def close() : Unit}, S](closeable: T)(operation: T => S): S = {
     try {
       operation(closeable)
     } finally {

@@ -4,7 +4,6 @@ package scala.pattern
 import org.junit.Test
 
 import scala.math.{E, Pi}
-import scala.runtime.Nothing$
 
 class Patterns {
   def wildcardPattern(expr: Expr): Unit = expr match {

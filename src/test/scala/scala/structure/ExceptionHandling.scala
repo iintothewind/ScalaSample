@@ -3,7 +3,7 @@ package scala.structure
 import java.io._
 import java.net.{MalformedURLException, URL}
 
-import org.junit.{Ignore, Test}
+import org.junit.Test
 
 import scala.io.Source
 

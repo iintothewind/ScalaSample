@@ -1,10 +1,9 @@
 package scala.xml
 
-import java.io.File
-
-import org.junit.{Ignore, Test}
+import org.junit.Test
 
 class Serialize {
+
   abstract class CCTherm {
     val description: String
     val yearMade: Int
