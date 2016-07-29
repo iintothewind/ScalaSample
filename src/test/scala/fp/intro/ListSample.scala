@@ -5,11 +5,13 @@ import org.junit.Test
 import scala.annotation.tailrec
 
 sealed trait Lst[+A] {
-  def head(): A
+  def head: A
 
-  def tail(): Lst[A]
+  def tail: Lst[A]
 
-  def init(): Lst[A]
+  def headOption: Option[A]
+
+  def init: Lst[A]
 
   def ::[B >: A](x: B): Lst[B]
 
@@ -18,8 +20,6 @@ sealed trait Lst[+A] {
   def isEmpty: Boolean
 
   def length: Int
-
-  def setHead[B >: A](newHead: B): Lst[B]
 
   def drop(n: Int): Lst[A]
 
@@ -57,23 +57,23 @@ sealed trait Lst[+A] {
 }
 
 case object Nls extends Lst[Nothing] {
-  override def head(): Nothing = throw new UnsupportedOperationException("head of empty list")
+  override def head: Nothing = throw new UnsupportedOperationException("head of empty list")
 
-  override def tail(): Nothing = throw new UnsupportedOperationException("tail of empty list")
+  override def tail: Nothing = throw new UnsupportedOperationException("tail of empty list")
 
-  override def init(): Lst[Nothing] = throw new UnsupportedOperationException("init of empty list")
+  override def headOption: Option[Nothing] = None
+
+  override def init: Lst[Nothing] = this
 
   override def ::[B >: Nothing](x: B): Lst[B] = Cons(x, this)
 
   override def :::[B >: Nothing](nxs: Lst[B]): Lst[B] = nxs
 
-  override def toString: String = ""
+  override def toString: String = "Nil"
 
   override def isEmpty: Boolean = true
 
   override def length: Int = 0
-
-  override def setHead[B >: Nothing](newHead: B): Lst[B] = Cons(newHead, Nls)
 
   override def drop(n: Int): Lst[Nothing] = this
 
@@ -112,14 +112,20 @@ case object Nls extends Lst[Nothing] {
 
 
 case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
-  override def head(): A = this.x
+  override def head: A = this.x
 
-  override def tail(): Lst[A] = this.xs
+  override def tail: Lst[A] = this.xs
 
-  override def init(): Lst[A] = xs match {
-    case Nls => Nls
-    case Cons(rx, Nls) => Cons(x, Nls)
-    case _ => Cons(x, xs.init())
+  override def headOption: Option[A] = Some(x)
+
+  override def init: Lst[A] = {
+    @tailrec
+    def loop(il: Lst[A], lst: Lst[A]): Lst[A] = lst match {
+      case Nls => Nls
+      case Cons(a, rs) if rs == Nls => il
+      case Cons(a, rs) if rs != Nls => loop(a :: il, rs)
+    }
+    loop(Nls, this).reverse
   }
 
   override def ::[B >: A](x: B): Lst[B] = Cons(x, this)
@@ -130,7 +136,14 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   //  }
   override def :::[B >: A](nxs: Lst[B]): Lst[B] = nxs.foldRight(this.asInstanceOf[Lst[B]])(Cons(_, _))
 
-  override def toString: String = x.toString + ", " + xs.toString
+  override def toString: String = {
+    @tailrec
+    def loop(ts: String, lst: Lst[A]): String = lst match {
+      case Nls => s"$ts::${Nls.toString}"
+      case Cons(a, rs) => loop(s"$ts::${a.toString}", rs)
+    }
+    loop("", this).drop(2)
+  }
 
   override def isEmpty: Boolean = false
 
@@ -144,8 +157,6 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   //  }
 
   override def length: Int = foldLeft(0)((n, _) => n + 1)
-
-  override def setHead[B >: A](newHead: B): Lst[B] = Cons(newHead, this.xs)
 
   override def drop(n: Int): Lst[A] = {
     @tailrec
@@ -275,11 +286,18 @@ object Lst {
     case Cons(x, rs) => f(x, foldRight(rs, z)(f)) //no tailrec, quire a failure
   }
 
+  def empty[A]: Lst[A] = Nls
+
   def apply[A](as: A*): Lst[A] = if (as.isEmpty) Nls else Cons(as.head, apply(as.tail: _*))
 }
 
 
 class ListSample {
+  @Test
+  def testToString(): Unit = {
+    assert("1::2::3::Nil" == Lst(1, 2, 3).toString)
+  }
+
   @Test
   def testCaseMatching(): Unit = {
     val v = Lst(1, 2, 3, 4, 5) match {
@@ -295,14 +313,8 @@ class ListSample {
 
   @Test(expected = classOf[UnsupportedOperationException])
   def testTail(): Unit = {
-    assert(Lst(2, 3) == Lst(1, 2, 3).tail())
-    Nls.tail()
-  }
-
-  @Test
-  def testSetHead(): Unit = {
-    assert(Lst(0) == Nls.setHead(0))
-    assert(Lst(0, 2, 3) == Lst(1, 2, 3).setHead(0))
+    assert(Lst(2, 3) == Lst(1, 2, 3).tail)
+    Nls.tail
   }
 
   @Test
@@ -340,12 +352,12 @@ class ListSample {
     assert(Lst(4, 6, 6, 1, 2, 3) == Lst(4, 6, 6) ::: Lst(1, 2, 3))
   }
 
-  @Test(expected = classOf[UnsupportedOperationException])
+  @Test
   def testInit(): Unit = {
-    assert(Lst(1, 2) == Lst(1, 2, 3).init())
-    assert(Lst(1) == Lst(1, 2).init())
-    assert(Nls == Lst(1).init())
-    assert(Nls == Nls.init())
+    assert(Lst(1, 2) == Lst(1, 2, 3).init)
+    assert(Lst(1) == Lst(1, 2).init)
+    assert(Nls == Lst(1).init)
+    assert(Nls == Nls.init)
   }
 
   @Test
@@ -391,7 +403,7 @@ class ListSample {
 
   @Test
   def testForeach(): Unit = {
-    Lst(1, 2, 3).foreach(println)
+    Lst(1, 2, 3).foreach(_.ensuring(_ > 0))
   }
 
   @Test
@@ -430,9 +442,6 @@ class ListSample {
 
   @Test
   def testFind(): Unit = {
-    for (x <- Option(9)) {
-      println(x)
-    }
     assert(Nls.find(_.equals(0)).isEmpty)
     assert(Lst(1, 2, 3).find(_ < 0).isEmpty)
     assert(Lst(1, 2, 3).find(_ > 2).isDefined)
