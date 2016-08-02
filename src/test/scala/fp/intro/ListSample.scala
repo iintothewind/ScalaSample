@@ -65,7 +65,7 @@ case object Nls extends Lst[Nothing] {
 
   override def init: Lst[Nothing] = this
 
-  override def ::[B >: Nothing](x: B): Lst[B] = Cons(x, this)
+  override def ::[B >: Nothing](x: B): Lst[B] = Cnl(x, this)
 
   override def :::[B >: Nothing](nxs: Lst[B]): Lst[B] = nxs
 
@@ -111,7 +111,7 @@ case object Nls extends Lst[Nothing] {
 }
 
 
-case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
+case class Cnl[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def head: A = this.x
 
   override def tail: Lst[A] = this.xs
@@ -122,25 +122,25 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
     @tailrec
     def loop(il: Lst[A], lst: Lst[A]): Lst[A] = lst match {
       case Nls => Nls
-      case Cons(a, rs) if rs == Nls => il
-      case Cons(a, rs) if rs != Nls => loop(a :: il, rs)
+      case Cnl(a, rs) if rs == Nls => il
+      case Cnl(a, rs) if rs != Nls => loop(a :: il, rs)
     }
     loop(Nls, this).reverse
   }
 
-  override def ::[B >: A](x: B): Lst[B] = Cons(x, this)
+  override def ::[B >: A](x: B): Lst[B] = Cnl(x, this)
 
   //  override def :::[B >: A](nxs: List[B]): List[B] = xs match {
-  //    case Nls => Cons(x, nxs)
-  //    case Cons(rx, rs: List[B]) => Cons(x, Cons(rx, rs ::: nxs))
+  //    case Nls => Cnl(x, nxs)
+  //    case Cnl(rx, rs: List[B]) => Cnl(x, Cnl(rx, rs ::: nxs))
   //  }
-  override def :::[B >: A](nxs: Lst[B]): Lst[B] = nxs.foldRight(this.asInstanceOf[Lst[B]])(Cons(_, _))
+  override def :::[B >: A](nxs: Lst[B]): Lst[B] = nxs.foldRight(this.asInstanceOf[Lst[B]])(Cnl(_, _))
 
   override def toString: String = {
     @tailrec
     def loop(ts: String, lst: Lst[A]): String = lst match {
       case Nls => s"$ts::${Nls.toString}"
-      case Cons(a, rs) => loop(s"$ts::${a.toString}", rs)
+      case Cnl(a, rs) => loop(s"$ts::${a.toString}", rs)
     }
     loop("", this).drop(2)
   }
@@ -151,7 +151,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   //    @tailrec
   //    def loop(len: Int, as: List[A]): Int = as match {
   //      case Nls => len
-  //      case Cons(a, rs) => loop(len + 1, rs)
+  //      case Cnl(a, rs) => loop(len + 1, rs)
   //    }
   //    loop(0, this)
   //  }
@@ -161,8 +161,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def drop(n: Int): Lst[A] = {
     @tailrec
     def loop(i: Int, l: Lst[A]): Lst[A] = l match {
-      case Nls => Nls
-      case Cons(a, rs) if i > 0 => loop(i - 1, rs)
+      case Cnl(a, rs) if i > 0 => loop(i - 1, rs)
       case _ => l
     }
     loop(n, this)
@@ -171,8 +170,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def dropWhile[B >: A](f: (B) => Boolean): Lst[B] = {
     @tailrec
     def loop[U >: A](l: Lst[U])(f: (U) => Boolean): Lst[U] = l match {
-      case Nls => Nls
-      case Cons(a, rs) if f(a) => loop(rs)(f)
+      case Cnl(a, rs) if f(a) => loop(rs)(f)
       case _ => l
     }
     loop(this)(f)
@@ -184,7 +182,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
     @tailrec
     def loop(as: Lst[A], z: B)(f: (B, A) => B): B = as match {
       case Nls => z
-      case Cons(a, rs) => loop(rs, f(z, a))(f)
+      case Cnl(a, rs) => loop(rs, f(z, a))(f)
     }
     loop(this, z)(f)
   }
@@ -206,8 +204,8 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def zip[B](bs: Lst[B]): Lst[(A, B)] = {
     @tailrec
     def loop(zipped: Lst[(A, B)], as: Lst[A], bs: Lst[B]): Lst[(A, B)] = (as, bs) match {
-      case (Nls, Nls) | (Nls, Cons(_, _)) | (Cons(_, _), Nls) => zipped
-      case (Cons(a, ars), Cons(b, brs)) => loop((a, b) :: zipped, ars, brs)
+      case (Nls, Nls) | (Nls, Cnl(_, _)) | (Cnl(_, _), Nls) => zipped
+      case (Cnl(a, ars), Cnl(b, brs)) => loop((a, b) :: zipped, ars, brs)
     }
     loop(Nls, this, bs).reverse
   }
@@ -216,7 +214,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
     @tailrec
     def loop(zipped: Lst[(A, Int)], i: Int, xs: Lst[A]): Lst[(A, Int)] = xs match {
       case Nls => zipped
-      case Cons(a, rs) => loop((a, i) :: zipped, i + 1, rs)
+      case Cnl(a, rs) => loop((a, i) :: zipped, i + 1, rs)
     }
     loop(Nls, 0, this).reverse
   }
@@ -224,8 +222,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def take(n: Int): Lst[A] = {
     @tailrec
     def loop(i: Int, taken: Lst[A], as: Lst[A]): Lst[A] = as match {
-      case Nls => taken
-      case Cons(a, rs) if i > 0 => loop(i - 1, a :: taken, rs)
+      case Cnl(a, rs) if i > 0 => loop(i - 1, a :: taken, rs)
       case _ => taken
     }
     loop(n, Nls, this).reverse
@@ -234,8 +231,7 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def takeWhile(p: (A) => Boolean): Lst[A] = {
     @tailrec
     def loop(taken: Lst[A], as: Lst[A])(p: A => Boolean): Lst[A] = as match {
-      case Nls => taken
-      case Cons(a, rs) if p(a) => loop(a :: taken, rs)(p)
+      case Cnl(a, rs) if p(a) => loop(a :: taken, rs)(p)
       case _ => taken
     }
     loop(Nls, this)(p).reverse
@@ -244,9 +240,9 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def find(p: (A) => Boolean): Option[A] = {
     @tailrec
     def loop(as: Lst[A])(p: A => Boolean): Option[A] = as match {
-      case Nls => None
-      case Cons(a, rs) if p(a) => Some(a)
-      case Cons(a, rs) if !p(a) => loop(rs)(p)
+      case Cnl(a, rs) if p(a) => Some(a)
+      case Cnl(a, rs) if !p(a) => loop(rs)(p)
+      case _ => None
     }
     loop(this)(p)
   }
@@ -256,10 +252,10 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def forall(p: (A) => Boolean): Boolean = {
     @tailrec
     def loop(as: Lst[A])(p: A => Boolean): Boolean = as match {
-      case Nls => false
-      case Cons(a, _) if !p(a) => false
-      case Cons(a, Nls) if p(a) => true
-      case Cons(a, rs) if p(a) => loop(rs)(p)
+      case Cnl(a, _) if !p(a) => false
+      case Cnl(a, Nls) if p(a) => true
+      case Cnl(a, rs) if p(a) => loop(rs)(p)
+      case _ => false
     }
     loop(this)(p)
   }
@@ -268,8 +264,8 @@ case class Cons[+A](x: A, xs: Lst[A]) extends Lst[A] {
     @tailrec
     def loop(as: Lst[A], sub: Lst[U]): Boolean = as match {
       case Nls => false
-      case l@Cons(_, _) if sub.length > l.length => false
-      case l@Cons(_, _) if l.take(sub.length) == sub => true
+      case l@Cnl(_, _) if sub.length > l.length => false
+      case l@Cnl(_, _) if l.take(sub.length) == sub => true
       case _ => loop(as.drop(1), sub)
     }
     loop(this, sub)
@@ -283,12 +279,12 @@ object Lst {
 
   def foldRight[A, B](xs: Lst[A], z: B)(f: (A, B) => B): B = xs match {
     case Nls => z
-    case Cons(x, rs) => f(x, foldRight(rs, z)(f)) //no tailrec, quire a failure
+    case Cnl(x, rs) => f(x, foldRight(rs, z)(f)) //no tailrec, quire a failure
   }
 
   def empty[A]: Lst[A] = Nls
 
-  def apply[A](as: A*): Lst[A] = if (as.isEmpty) Nls else Cons(as.head, apply(as.tail: _*))
+  def apply[A](as: A*): Lst[A] = if (as.isEmpty) Nls else Cnl(as.head, apply(as.tail: _*))
 }
 
 
@@ -301,10 +297,10 @@ class ListSample {
   @Test
   def testCaseMatching(): Unit = {
     val v = Lst(1, 2, 3, 4, 5) match {
-      case Cons(x, Cons(2, Cons(4, _))) => x
+      case Cnl(x, Cnl(2, Cnl(4, _))) => x
       case Nls => 42
-      case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-      case Cons(h, t) => h + Lst.sum(t)
+      case Cnl(x, Cnl(y, Cnl(3, Cnl(4, _)))) => x + y
+      case Cnl(h, t) => h + Lst.sum(t)
       case _ => 101
     }
 
@@ -341,7 +337,7 @@ class ListSample {
 
 
   @Test
-  def testCons(): Unit = {
+  def testCnl(): Unit = {
     assert(Lst(1, 2, 3) == 1 :: 2 :: 3 :: Nls)
   }
 
@@ -364,15 +360,15 @@ class ListSample {
   def testFoldLeft(): Unit = {
     assert(1 == Nls.foldLeft[Int](1)(_+_.asInstanceOf[Int]))
     assert(6 == Lst(1, 2, 3).foldLeft(1)(_ * _))
-    assert(Lst(3, 2, 1) == Lst(1, 2, 3).foldLeft(Nls: Lst[Int])((lst, itm) => Cons(itm, lst)))
+    assert(Lst(3, 2, 1) == Lst(1, 2, 3).foldLeft(Nls: Lst[Int])((lst, itm) => Cnl(itm, lst)))
   }
 
   @Test
   def testFoldRight(): Unit = {
     assert(0 == Nls.foldRight[Int](0)(_.asInstanceOf[Int]+_))
     assert(6 == Lst(1, 2, 3).foldRight(0)(_ + _))
-    assert(Lst(1, 2, 3) == Lst(1, 2, 3).foldRight(Nls: Lst[Int])(Cons(_, _)))
-    assert(Lst(1, 2, 3, 7, 8, 9) == Lst(1, 2, 3).foldRight(Lst(7, 8, 9))(Cons(_, _)))
+    assert(Lst(1, 2, 3) == Lst(1, 2, 3).foldRight(Nls: Lst[Int])(Cnl(_, _)))
+    assert(Lst(1, 2, 3, 7, 8, 9) == Lst(1, 2, 3).foldRight(Lst(7, 8, 9))(Cnl(_, _)))
   }
 
   @Test
