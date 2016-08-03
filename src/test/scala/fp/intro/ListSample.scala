@@ -167,13 +167,13 @@ case class Cnl[+A](x: A, xs: Lst[A]) extends Lst[A] {
     loop(n, this)
   }
 
-  override def dropWhile[B >: A](f: (B) => Boolean): Lst[B] = {
+  override def dropWhile[B >: A](p: (B) => Boolean): Lst[B] = {
     @tailrec
     def loop[U >: A](l: Lst[U])(f: (U) => Boolean): Lst[U] = l match {
       case Cnl(a, rs) if f(a) => loop(rs)(f)
       case _ => l
     }
-    loop(this)(f)
+    loop(this)(p)
   }
 
   //override def foldLeft[U >: A, B](z: B)(f: (B, U) => B): B = xs.foldLeft(f(z, x))(f)
@@ -197,7 +197,7 @@ case class Cnl[+A](x: A, xs: Lst[A]) extends Lst[A] {
 
   override def flatMap[B](f: (A) => Lst[B]): Lst[B] = this.foldLeft(Lst[B]())((list, element) => list ::: f(element))
 
-  override def filter(f: (A) => Boolean): Lst[A] = this.flatMap(x => if (f(x)) Lst(x) else Nls)
+  override def filter(p: (A) => Boolean): Lst[A] = this.flatMap(x => if (p(x)) Lst(x) else Nls)
 
   override def foreach[B](f: (A) => B): Unit = this.foldLeft(Unit.asInstanceOf[B])((_, x) => f(x))
 
