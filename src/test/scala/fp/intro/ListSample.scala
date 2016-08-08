@@ -204,8 +204,8 @@ case class Cnl[+A](x: A, xs: Lst[A]) extends Lst[A] {
   override def zip[B](bs: Lst[B]): Lst[(A, B)] = {
     @tailrec
     def loop(zipped: Lst[(A, B)], as: Lst[A], bs: Lst[B]): Lst[(A, B)] = (as, bs) match {
-      case (Nls, Nls) | (Nls, Cnl(_, _)) | (Cnl(_, _), Nls) => zipped
       case (Cnl(a, ars), Cnl(b, brs)) => loop((a, b) :: zipped, ars, brs)
+      case _ => zipped
     }
     loop(Nls, this, bs).reverse
   }

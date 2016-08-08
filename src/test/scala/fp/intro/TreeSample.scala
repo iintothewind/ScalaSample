@@ -4,79 +4,103 @@ import org.junit.Test
 
 import scala.annotation.tailrec
 import scala.collection.immutable
+import scala.collection.immutable.Queue
 
 
-sealed abstract class Tree[A](lc: Option[Tree[A]], rc: Option[Tree[A]], v: Option[A]) {
-  def size: Int
+sealed abstract class Tree[A](lc: Option[Tree[A]], v: Option[A], rc: Option[Tree[A]]) {
+  override def toString: String = this match {
+    case Leaf(a) => s"Leaf($a)"
+    case Branch(optl, a, optr) => s"Branch(${if (optl.nonEmpty) optl.get.toString else "None"}, Some($a), ${if (optr.nonEmpty) optr.get.toString else "None"})"
+  }
 
-  def depth: Int
-
-  def map[B](f: A => B): Tree[B]
-
-  def fold[B](z: B)(f: (B, A) => B): Tree[B]
-}
-
-sealed case class Leaf[A](v: A) extends Tree[A](lc = None, rc = None, Some(v)) {
-  override def toString: String = s"Leaf($v)"
-
-  override def size: Int = 1
-
-  override def depth: Int = 0
-
-  override def map[B](f: (A) => B): Leaf[B] = Leaf(f(v))
-
-  override def fold[B](z: B)(f: (B, A) => B): Tree[B] = Leaf(f(z, v))
-}
-
-sealed case class Branch[A](lc: Option[Tree[A]], rc: Option[Tree[A]]) extends Tree[A](lc, rc, v = None) {
-  override def toString: String = s"Branch(${if (lc.nonEmpty) lc.get.toString else "None"},${if (rc.nonEmpty) rc.get.toString else "None"})"
-
-  override def size: Int = {
+  def size: Int = {
     @tailrec
     def loop(size: Int, t: Seq[Tree[A]]): Int = t match {
       case Leaf(_) :: rs => loop(size + 1, rs)
-      case Branch(None, None) :: rs => loop(size + 1, rs)
-      case Branch(Some(l), None) :: rs => loop(size + 1, l :: rs)
-      case Branch(None, Some(r)) :: rs => loop(size + 1, r :: rs)
-      case Branch(Some(l), Some(r)) :: rs => loop(size + 1, l :: r :: rs)
+      case Branch(None, _, None) :: rs => loop(size + 1, rs)
+      case Branch(Some(l), _, None) :: rs => loop(size + 1, l :: rs)
+      case Branch(None, _, Some(r)) :: rs => loop(size + 1, r :: rs)
+      case Branch(Some(l), _, Some(r)) :: rs => loop(size + 1, l :: r :: rs)
       case immutable.Nil => size
     }
     loop(0, Seq(this))
   }
 
   // should be changed to tail recursive
-  override def depth: Int = (lc, rc) match {
+  def depth: Int = (lc, rc) match {
     case (None, None) => 0
     case (Some(l), None) => l.depth + 1
     case (None, Some(r)) => 1 + r.depth
     case (Some(l), Some(r)) => 1 + l.depth.max(r.depth)
   }
 
-  override def map[B](f: (A) => B): Branch[B] = (lc, rc) match {
-    case (None, None) => Branch(None, None)
-    case (Some(l), None) => Branch(Option(l.map(f)), None)
-    case (None, Some(r)) => Branch(None, Option(r.map(f)))
-    case (Some(l), Some(r)) => Branch(Option(l.map(f)), Option(r.map(f)))
+  def turn: Tree[A] = this match {
+    case Leaf(a) => Leaf(a)
+    case Branch(None, a, None) => Branch(None, a, None)
+    case Branch(Some(l), a, None) => Branch(None, a, Some(l.turn))
+    case Branch(None, a, Some(r)) => Branch(Some(r.turn), a, None)
+    case Branch(Some(l), a, Some(r)) => Branch(Some(r.turn), a, Some(l.turn))
   }
 
-  override def fold[B](z: B)(f: (B, A) => B): Tree[B] = (lc, rc) match {
-    case (None, None) => Branch(None, None)
-    case (Some(l), None) => Branch(Option(l.fold(z)(f)), None)
-    case (None, Some(r)) => Branch(None, Option(r.fold(z)(f)))
-    case (Some(l), Some(r)) => Branch(Option(l.fold(z)(f)), Option(r.fold(z)(f)))
+  def map[B](f: A => B): Tree[B] = this match {
+    case Leaf(a) => Leaf(f(a))
+    case Branch(None, a, None) => Branch(None, f(a), None)
+    case Branch(Some(l), a, None) => Branch(Some(l.map(f)), f(a), None)
+    case Branch(None, a, Some(r)) => Branch(None, f(a), Some(r.map(f)))
+    case Branch(Some(l), a, Some(r)) => Branch(Some(l.map(f)), f(a), Some(r.map(f)))
+  }
+
+  /**
+   * depth first traverse
+   * @param f
+   * @tparam B
+   */
+  def dforeach[B](f: A => B): Unit = {
+    @tailrec
+    def loop(lst: Seq[Tree[A]])(f: A => B): Unit = lst match {
+      case Leaf(a) :: rs => f(a); loop(rs)(f)
+      case Branch(None, a, None) :: rs => f(a); loop(rs)(f)
+      case Branch(Some(l), a, None) :: rs => f(a); loop(l :: rs)(f)
+      case Branch(None, a, Some(r)) :: rs => f(a); loop(r :: rs)(f)
+      case Branch(Some(l), a, Some(r)) :: rs => f(a); loop(l :: r :: rs)(f)
+      case _ =>
+    }
+    loop(Seq(this))(f)
+  }
+
+  /**
+   * broad first traverse
+   * @param f
+   * @tparam B
+   */
+  def bforeach[B](f: A => B): Unit = {
+    @tailrec
+    def loop(queue: Queue[Tree[A]])(f: A => B): Unit = queue.dequeueOption match {
+      case Some((Leaf(a), q)) => f(a); loop(q)(f)
+      case Some((Branch(None, a, None), q)) => f(a); loop(q)(f)
+      case Some((Branch(Some(l), a, None), q)) => f(a); loop(q.enqueue(l))(f)
+      case Some((Branch(None, a, Some(r)), q)) => f(a); loop(q.enqueue(r))(f)
+      case Some((Branch(Some(l), a, Some(r)), q)) => f(a); loop(q.enqueue(l).enqueue(r))(f)
+      case _ =>
+    }
+    loop(Queue(this))(f)
   }
 
 }
+
+sealed case class Leaf[A](v: A) extends Tree[A](lc = None, Some(v), rc = None)
+
+sealed case class Branch[A](lc: Option[Tree[A]], v: A, rc: Option[Tree[A]]) extends Tree[A](lc, Some(v), rc)
 
 object Tree {
   def max(t: Tree[Int]): Int = {
     @tailrec
     def loop(mx: Int, t: Seq[Tree[Int]]): Int = t match {
       case Leaf(v) :: rs => loop(mx.max(v), rs)
-      case Branch(None, None) :: rs => loop(mx, rs)
-      case Branch(Some(l), None) :: rs => loop(mx, l :: rs)
-      case Branch(None, Some(r)) :: rs => loop(mx, r :: rs)
-      case Branch(Some(l), Some(r)) :: rs => loop(mx, l :: r :: rs)
+      case Branch(None, v, None) :: rs => loop(mx.max(v), rs)
+      case Branch(Some(l), v, None) :: rs => loop(mx.max(v), l :: rs)
+      case Branch(None, v, Some(r)) :: rs => loop(mx.max(v), r :: rs)
+      case Branch(Some(l), v, Some(r)) :: rs => loop(mx.max(v), l :: r :: rs)
       case immutable.Nil => mx
     }
     loop(Int.MinValue, Seq(t))
@@ -84,37 +108,10 @@ object Tree {
 }
 
 class TreeSample {
-
+  //Some(Branch(Some(Leaf("D"))), "B", Some(Leaf("E"))))
   @Test
-  def testSize(): Unit = {
-    assert(1 == Leaf(0).size)
-    assert(3 == Branch(Some(Leaf(0)), Some(Leaf(1))).size)
-    assert(2 == Branch(None, Some(Leaf(1))).size)
-    assert(2 == Branch(Some(Leaf(1)), None).size)
-    assert(4 == Branch(None, Some(Branch(Some(Leaf(1)), Some(Leaf(2))))).size)
-    assert(5 == Branch(Some(Leaf(0)), Some(Branch(Some(Leaf(1)), Some(Leaf(2))))).size)
-    assert(6 == Branch(Some(Branch(None, Some(Leaf(2)))), Some(Branch(Some(Leaf(3)), Some(Leaf(4))))).size)
-    assert(7 == Branch(Some(Branch(Some(Leaf(1)), Some(Leaf(2)))), Some(Branch(Some(Leaf(3)), Some(Leaf(4))))).size)
-
+  def test_dforeach(): Unit = {
+    //Branch(Some(Branch(Some(Leaf("D")), "B", Some(Leaf("E")))), "A", Some(Branch(Some(Leaf("F")), "C", Some(Leaf("G"))))).dforeach(println)
+    Branch(Some(Branch(Some(Leaf("D")), "B", Some(Leaf("E")))), "A", Some(Branch(Some(Leaf("F")), "C", Some(Leaf("G"))))).bforeach(println)
   }
-
-  @Test
-  def testMaxIntTree(): Unit = {
-    assert(4 == Tree.max(Branch(Some(Branch(Some(Leaf(1)), Some(Leaf(2)))), Some(Branch(Some(Leaf(3)), Some(Leaf(4)))))))
-  }
-
-  @Test
-  def testDepth(): Unit = {
-    assert(0 == Leaf(0).depth)
-    assert(1 == Branch(Some(Leaf(0)), Some(Leaf(1))).depth)
-    assert(3 == Branch(None, Some(Branch(Some(Leaf(1)), Some(Branch(Some(Leaf(0)), Some(Leaf(1))))))).depth)
-    assert(2 == Branch(Some(Branch(Some(Leaf(1)), Some(Leaf(2)))), Some(Branch(Some(Leaf(3)), Some(Leaf(4))))).depth)
-  }
-
-  @Test
-  def testMap(): Unit = {
-    assert(Leaf(1) == Leaf(0).map(v => v + 1))
-    assert(Branch(None, Some(Branch(Some(Leaf(2)), Some(Branch(Some(Leaf(1)), Some(Leaf(2))))))) == Branch(None, Some(Branch(Some(Leaf(1)), Some(Branch(Some(Leaf(0)), Some(Leaf(1))))))).map(v => v + 1))
-  }
-
 }

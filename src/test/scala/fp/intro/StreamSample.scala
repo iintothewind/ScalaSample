@@ -157,6 +157,16 @@ sealed trait Strim[+A] {
   def flatMap[B](f: A => Strim[B]): Strim[B] = foldRight(Strim.empty[B])((element, result) => f(element) #::: result)
 
   def filter(p: (A) => Boolean): Strim[A] = flatMap(x => if (p(x)) Strim(x) else Nis)
+
+  def zipWith[B, C](that: Strim[B])(f: (A, B) => C): Strim[C] = Strim.unfold((this, that)) {
+    case (l #:: lst, r #:: rst) => Some(f(l, r), (lst, rst))
+    case _ => None
+  }
+
+  def zip[B](that: Strim[B]) = zipWith(that)((_, _))
+
+  def startsWith[U >: A](that: Strim[U]): Boolean = this.zip(that).length == that.length
+
 }
 
 case object Nis extends Strim[Nothing]
@@ -187,6 +197,11 @@ object Strim {
   def empty[A]: Strim[A] = Nis
 
   def apply[A](xs: A*): Strim[A] = if (xs.isEmpty) empty else cons(xs.head, apply(xs.tail: _*))
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Strim[A] = f(z) match {
+    case None => Nis
+    case Some((a, s)) => a #:: unfold(s)(f)
+  }
 
   def constant[A](a: A): Strim[A] = {
     //This is more efficient than `a#::constant(a)`
@@ -411,15 +426,28 @@ class StreamSample {
   @Test
   def testConstant(): Unit = {
     assert(List(1, 1, 1) == Strim.constant(1).take(3).toList)
+    assert(Strim.constant(1).take(3).toList == Strim.unfold(1)(_ => Some((1, 1))).take(3).toList)
   }
 
   @Test
   def testFrom(): Unit = {
     assert(List(0, 1, 2) == Strim.from(0, 1).take(3).toList)
+    assert(Strim.from(0, 1).take(3).toList == Strim.unfold(0)(s => Some((s, s + 1))).take(3).toList)
   }
 
   @Test
   def testFibonacci(): Unit = {
     assert(List(5, 3, 2, 1, 1, 0) == Strim.fibonacci(5).toList)
+    assert(Strim.unfold((0, 1))(s => Some((s._1, (s._2, s._1 + s._2)))).take(6).toList == Strim.fibonacci(5).reverse.toList)
+  }
+
+  @Test
+  def testZip(): Unit = {
+    assert(List((1, 4), (2, 5), (3, 6)) == Strim(1, 2, 3).zip(Strim(4, 5, 6)).toList)
+  }
+
+  @Test
+  def testStartsWith(): Unit = {
+    assert(Strim(1, 2, 3).startsWith(Strim(1, 2)))
   }
 }
