@@ -133,16 +133,16 @@ sealed trait Strim[+A] {
   }
 
   // not laziness
-  def foldLeft[B](z: => B)(f: (=> B, A) => B): B = {
+  def foldLeft[B](z: => B)(f: (=> B, => A) => B): B = {
     @tailrec
-    def loop(st: Strim[A], z: => B)(f: (=> B, A) => B): B = st match {
+    def loop(st: Strim[A], z: => B)(f: (=> B, => A) => B): B = st match {
       case Nis => z
       case Cns(h, t) => loop(t(), f(z, h()))(f)
     }
     loop(this, z)(f)
   }
 
-  def foldRight[B](z: => B)(f: (A, => B) => B): B = if (isEmpty) z else f(head, tail.foldRight(z)(f))
+  def foldRight[B](z: => B)(f: (=> A, => B) => B): B = if (isEmpty) z else f(head, tail.foldRight(z)(f))
 
   def exists(p: A => Boolean): Boolean = foldRight(false)((element, result) => p(element) || result)
 
