@@ -17,16 +17,16 @@ case class Rng(seed: Long) {
   //    case otherwise => otherwise
   //  }
 
-  def nextNonNegativeInt: (Int, Rng) = Rng.nextNonNegativeInt(this)
+  def nextNonNegativeInt: (Int, Rng) = Rng.nextNonNegativeInt.run(this)
 
-  def nextInt(bound: Int): (Int, Rng) = Rng.nextInt(bound)(this)
+  def nextInt(bound: Int): (Int, Rng) = Rng.nextInt(bound).run(this)
 
   //  def nextDouble: (Double, Rng) = {
   //    val (nonNegativeInt, rng) = nextNonNegativeInt
   //    (nonNegativeInt / Int.MaxValue.toDouble, rng)
   //  }
 
-  def nextDouble: (Double, Rng) = Rng.nextDouble(this)
+  def nextDouble: (Double, Rng) = Rng.nextDouble.run(this)
 
   //  def intDouble: ((Int, Double), Rng) = {
   //    val (i, rng1) = nextInt
@@ -35,7 +35,7 @@ case class Rng(seed: Long) {
   //    ((i, d), rng)
   //  }
 
-  def intDouble: ((Int, Double), Rng) = Rng.intDouble(this)
+  def intDouble: ((Int, Double), Rng) = Rng.intDouble.run(this)
 
   //  def doubleInt: ((Double, Int), Rng) = {
   //    val (d, rng1) = nextDouble
@@ -43,7 +43,7 @@ case class Rng(seed: Long) {
   //    ((d, i), rng)
   //  }
 
-  def doubleInt: ((Double, Int), Rng) = Rng.doubleInt(this)
+  def doubleInt: ((Double, Int), Rng) = Rng.doubleInt.run(this)
 
 
   //  def ints(count: Int): (List[Int], Rng) = {
@@ -55,7 +55,7 @@ case class Rng(seed: Long) {
   //    loop(Nil, count, this)
   //  }
 
-  def ints(count: Int): (List[Int], Rng) = Rng.sequence(List.fill(count)(Rng.nextInt))(this)
+  def ints(count: Int): (List[Int], Rng) = Rng.sequence(List.fill(count)(Rng.nextInt)).run(this)
 }
 
 object Rng {
@@ -80,9 +80,9 @@ object Rng {
 
   def sequence[A](lst: List[Rand[A]]): Rand[List[A]] = State.sequence(lst)
 
-  def nextInt: Rand[Int] = map(_.nextInt)(identity)
+  def nextInt: Rand[Int] = State(_.nextInt)
 
-  def nextNonNegativeInt: Rand[Int] = map(_.nextInt) {
+  def nextNonNegativeInt: Rand[Int] = map(nextInt) {
     case v if v < 0 => -(v + 1)
     case otherwise => otherwise
   }
@@ -100,31 +100,42 @@ object Rng {
 
 }
 
+case class State[S, +A](run: S => (A, S)) {
+  def flatMap[U >: A, B](f: U => State[S, B]): State[S, B] = State(state => {
+    val (a, nst) = this.run(state)
+    f(a).run(nst)
+  })
+
+  def map[B](f: A => B): State[S, B] = flatMap[A,B](a => State.unit(f(a)))
+
+  def map2[B, C](b: State[S, B])(f: (A, B) => C): State[S, C] = flatMap[A,C](a => b.map(b => f(a, b)))
+
+  def get: State[S, S] = State(s => (s, s))
+
+  def set(s: S): State[S, Unit] = State(_ => ((), s))
+}
+
 
 object State {
-  def unit[S, A](a: A): State[S, A] = (a, _)
+  def unit[S, A](a: A): State[S, A] = State((a, _))
 
-  def flatMap[S, A, B](s: State[S, A])(f: A => State[S, B]): State[S, B] = state => {
-    val (a, sa) = s(state)
-    f(a)(sa)
-  }
+  def flatMap[S, A, B](s: State[S, A])(f: A => State[S, B]): State[S, B] = State(state => {
+    val (a, sa) = s.run(state)
+    f(a).run(sa)
+  })
 
   def map[S, A, B](s: State[S, A])(f: A => B): State[S, B] = flatMap(s)(a => unit(f(a)))
 
   def map2[S, A, B, C](ra: State[S, A], rb: State[S, B])(f: (A, B) => C): State[S, C] = flatMap(ra)(a => map(rb)(b => f(a, b)))
 
-  def sequence[S, A](lst: List[State[S, A]]): State[S, List[A]] = initState => {
+  def sequence[S, A](lst: List[State[S, A]]): State[S, List[A]] = State(initState => {
     @tailrec
     def loop(as: List[A], state: S, sl: List[State[S, A]]): (List[A], S) = sl match {
       case Nil => (as, state)
-      case x :: rs => val (xa, xstate) = x(state); loop(xa :: as, xstate, rs)
+      case x :: rs => val (xa, xstate) = x.run(state); loop(xa :: as, xstate, rs)
     }
     loop(Nil, initState, lst)
-  }
-
-  //  def get[S, A](st: State[S, A]): State[S, S] = st => (st, st)
-  //
-  //  def set[S, A](initState: State[S, A], s: S): State[S, Unit] = s => (Unit, initState(s)._2)
+  })
 }
 
 sealed trait Input
@@ -136,9 +147,9 @@ case object Turn extends Input
 case class Machine(locked: Boolean, candies: Int, coins: Int)
 
 object Machine {
-//  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = {
-//    ???
-//  }
+  //  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = {
+  //    ???
+  //  }
 }
 
 
@@ -165,7 +176,7 @@ class StateSample {
 
   @Test
   def testNextIntLessThan(): Unit = {
-    println(Rng.sequence(List.fill(9)(Rng.nextInt(20)))(Rng(0)))
+    println(Rng.sequence(List.fill(9)(Rng.nextInt(20))).run(Rng(0)))
   }
 
 
