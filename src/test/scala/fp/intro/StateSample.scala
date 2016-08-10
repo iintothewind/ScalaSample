@@ -1,7 +1,6 @@
 package fp.intro
 
 import org.junit.Test
-
 import scala.annotation.tailrec
 
 case class Rng(seed: Long) {
@@ -19,6 +18,8 @@ case class Rng(seed: Long) {
   //  }
 
   def nextNonNegativeInt: (Int, Rng) = Rng.nextNonNegativeInt(this)
+
+  def nextInt(bound: Int): (Int, Rng) = Rng.nextInt(bound)(this)
 
   //  def nextDouble: (Double, Rng) = {
   //    val (nonNegativeInt, rng) = nextNonNegativeInt
@@ -58,27 +59,26 @@ case class Rng(seed: Long) {
 }
 
 object Rng {
-  type Rand[+A] = Rng => (A, Rng)
+  def unit[A](a: A): Rand[A] = State.unit(a)
 
-  def map[A, B](r: Rand[A])(f: A => B): Rand[B] = rng => {
-    val (a, nextRng) = r(rng)
-    (f(a), nextRng)
-  }
+  def flatMap[A, B](r: Rand[A])(f: A => Rand[B]): Rand[B] = State.flatMap(r)(f)
 
-  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = rng => {
-    val (a, rnga) = ra(rng)
-    val (b, rngb) = rb(rnga)
-    (f(a, b), rngb)
-  }
+  //  def map[A, B](r: Rand[A])(f: A => B): Rand[B] = rng => {
+  //    val (a, nextRng) = r(rng)
+  //    (f(a), nextRng)
+  //  }
 
-  def sequence[A](lst: List[Rand[A]]): Rand[List[A]] = initRng => {
-    @tailrec
-    def loop(as: List[A], rng: Rng, rnds: List[Rand[A]]): (List[A], Rng) = rnds match {
-      case Nil => (as, rng)
-      case x :: rs => val (xa, xrng) = x(rng); loop(xa :: as, xrng, rs)
-    }
-    loop(Nil, initRng, lst)
-  }
+  def map[A, B](r: Rand[A])(f: A => B): Rand[B] = State.map(r)(f)
+
+  //  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = rng => {
+  //    val (a, rnga) = ra(rng)
+  //    val (b, rngb) = rb(rnga)
+  //    (f(a, b), rngb)
+  //  }
+
+  def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = State.map2(ra, rb)(f)
+
+  def sequence[A](lst: List[Rand[A]]): Rand[List[A]] = State.sequence(lst)
 
   def nextInt: Rand[Int] = map(_.nextInt)(identity)
 
@@ -87,7 +87,10 @@ object Rng {
     case otherwise => otherwise
   }
 
-  def nextInt(bound: Int): Rand[Int] = map(nextNonNegativeInt)(_ % bound)
+  def nextInt(bound: Int): Rand[Int] = flatMap(nextNonNegativeInt)(i => i % bound match {
+    case mod if i + (bound - 1) - mod >= 0 => unit(mod)
+    case _ => nextInt(bound)
+  })
 
   def nextDouble: Rand[Double] = map(nextNonNegativeInt)(_ / Int.MaxValue.toDouble)
 
@@ -97,12 +100,52 @@ object Rng {
 
 }
 
-class StateSample {
 
+object State {
+  def unit[S, A](a: A): State[S, A] = (a, _)
+
+  def flatMap[S, A, B](s: State[S, A])(f: A => State[S, B]): State[S, B] = state => {
+    val (a, sa) = s(state)
+    f(a)(sa)
+  }
+
+  def map[S, A, B](s: State[S, A])(f: A => B): State[S, B] = flatMap(s)(a => unit(f(a)))
+
+  def map2[S, A, B, C](ra: State[S, A], rb: State[S, B])(f: (A, B) => C): State[S, C] = flatMap(ra)(a => map(rb)(b => f(a, b)))
+
+  def sequence[S, A](lst: List[State[S, A]]): State[S, List[A]] = initState => {
+    @tailrec
+    def loop(as: List[A], state: S, sl: List[State[S, A]]): (List[A], S) = sl match {
+      case Nil => (as, state)
+      case x :: rs => val (xa, xstate) = x(state); loop(xa :: as, xstate, rs)
+    }
+    loop(Nil, initState, lst)
+  }
+
+  //  def get[S, A](st: State[S, A]): State[S, S] = st => (st, st)
+  //
+  //  def set[S, A](initState: State[S, A], s: S): State[S, Unit] = s => (Unit, initState(s)._2)
+}
+
+sealed trait Input
+
+case object Coin extends Input
+
+case object Turn extends Input
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+
+object Machine {
+//  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = {
+//    ???
+//  }
+}
+
+
+class StateSample {
   @Test
   def testNextInt(): Unit = {
     assert(Rng(42L).nextInt == Rng(42L).nextInt)
-
   }
 
   @Test
@@ -124,4 +167,6 @@ class StateSample {
   def testNextIntLessThan(): Unit = {
     println(Rng.sequence(List.fill(9)(Rng.nextInt(20)))(Rng(0)))
   }
+
+
 }
