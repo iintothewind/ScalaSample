@@ -18,7 +18,7 @@ StreamSample, a Stream re-implementation with pure funtional programming
 ### Tree
 TreeSample, a Tree implementation with pure funtional programming
 ### Option
-OptionSample, an Optional re-implementation with pure funtional programming
+OptionSample, an Option re-implementation with pure funtional programming
 ### Either
 EitherSample, an Either re-implementation with pure funtional programming
 ### Laziness
