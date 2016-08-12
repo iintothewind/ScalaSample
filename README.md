@@ -7,6 +7,26 @@ My scala sample code while learning
 - Effective Scala
 - Scala School
 
+
+## functional programming
+### intro
+CafeSample, HofSample
+### List
+ListSample, a List re-implementation with pure funtional programming
+### Stream
+StreamSample, a Stream re-implementation with pure funtional programming
+### Tree
+TreeSample, a Tree implementation with pure funtional programming
+### Option
+OptionSample, an Optional re-implementation with pure funtional programming
+### Either
+EitherSample, an Either re-implementation with pure funtional programming
+### Laziness
+Scala Lazy evaluation and Strict evaluation showcase
+### State
+StateSample, a pure fuctional state implementation
+
+
 ## scala
 ### basic
 scala basic concepts
@@ -40,21 +60,3 @@ ifs,loops,exection handling
 traits design
 ### xml
 xml operations
-
-## functional programming
-### intro
-CafeSample, HofSample
-### List
-ListSample, a List implementation with pure funtional programming
-### Stream
-StreamSample, a Stream implementation with pure funtional programming
-### Tree
-TreeSample, a Tree implementation with pure funtional programming
-### Option
-OptionSample, an enhanced Optional implementation with pure funtional programming
-### Either
-EitherSample, an Either implementation with pure funtional programming
-### Laziness
-Scala Lazy evaluation and Strict evaluation showcase
-### State
-StateSample, a pure fuctional state implementation
