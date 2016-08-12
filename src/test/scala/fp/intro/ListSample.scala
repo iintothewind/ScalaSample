@@ -279,7 +279,7 @@ object Lst {
 
   def foldRight[A, B](xs: Lst[A], z: B)(f: (A, B) => B): B = xs match {
     case Nls => z
-    case Cnl(x, rs) => f(x, foldRight(rs, z)(f)) //no tailrec, quire a failure
+    case Cnl(x, rs) => f(x, foldRight(rs, z)(f)) //no tailrec, quite a failure
   }
 
   def empty[A]: Lst[A] = Nls
