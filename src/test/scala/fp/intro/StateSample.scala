@@ -108,6 +108,8 @@ case class State[S, +A](run: S => (A, S)) {
 
   def map[B](f: A => B): State[S, B] = flatMap[A,B](a => State.unit(f(a)))
 
+  def filter(p: A => Boolean): State[S, A] = this //to use for syntactic sugar
+
   def map2[B, C](b: State[S, B])(f: (A, B) => C): State[S, C] = flatMap[A,C](a => b.map(b => f(a, b)))
 
   def get: State[S, S] = State(s => (s, s))
@@ -123,6 +125,7 @@ object State {
     val (a, sa) = s.run(state)
     f(a).run(sa)
   })
+
 
   def map[S, A, B](s: State[S, A])(f: A => B): State[S, B] = flatMap(s)(a => unit(f(a)))
 
@@ -144,12 +147,23 @@ case object Coin extends Input
 
 case object Turn extends Input
 
-case class Machine(locked: Boolean, candies: Int, coins: Int)
+sealed case class Machine(locked: Boolean, candies: Int, coins: Int) {
+  def react(input: Input): Machine = Machine.react(input).run(this)._2
+
+  def react(inputs: List[Input]): Machine = Machine.react(inputs).run(this)._2
+}
 
 object Machine {
-    def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = {
-      ???
-    }
+
+  def react(input: Input): State[Machine, (Int, Int)] = State[Machine, (Int, Int)](machine=> (machine, input) match {
+    case (Machine(true, candies, coins), Coin) if candies > 0 => ((candies, coins + 1),Machine(locked = false, candies, coins+1))
+    case (Machine(false, candies, coins), Turn) => ((candies - 1, coins),Machine(locked = true, candies - 1, coins))
+    case _=>((machine.candies,machine.coins),machine)
+  })
+
+  def react(inputs: List[Input]): State[Machine, List[(Int, Int)]] = State.sequence(inputs.map(react))
+
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = State.sequence(inputs.map(react)).map(_.head)
 }
 
 
@@ -175,8 +189,33 @@ class StateSample {
   }
 
   @Test
+  def testFlatMaps(): Unit = {
+    val ns = Rng.nextInt(99).flatMap[Int,List[Int]](x =>
+      Rng.nextInt(9).flatMap[Int,List[Int]](y =>
+        Rng.sequence(List.fill(9)(Rng.nextInt(x))).map(xs => xs.map(_ % (y + 1)))
+      )
+    )
+    println(ns.run(Rng(0)))
+  }
+
+  @Test
+  def testForComprehensions(): Unit = {
+    val ns = for {x: Int <- Rng.nextInt(99)
+                  y: Int <- Rng.nextInt(9)
+                  xs <- Rng.sequence(List.fill(9)(Rng.nextInt(x)))} yield xs.map(_ % (y + 1))
+    println(ns.run(Rng(0)))
+  }
+
+  @Test
   def testNextIntLessThan(): Unit = {
     println(Rng.sequence(List.fill(9)(Rng.nextInt(20))).run(Rng(0)))
+  }
+
+  @Test
+  def testsimulateMachine(): Unit = {
+    println(Machine(locked = true, 10, 0).react(Nil))
+    println(Machine(locked = true, 10, 0).react(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)))
+    println(Machine.simulateMachine(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)).run(Machine(locked = true, 10, 0)))
   }
 
 

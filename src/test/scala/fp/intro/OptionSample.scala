@@ -30,15 +30,14 @@ sealed trait Opt[+A] {
     case _ => Non
   }
 
-  // for ... yield would work for Option because of the syntactic sugar but no here, damn!
-  //def map2[B, C](that: Opt[B])(f: (A, B) => C): Opt[C] = for (a <- this; b <- that) yield f(a, b)
+  //  def map2[B, C](that: Opt[B])(f: (A, B) => C): Opt[C] = (this, that) match {
+  //    case (Sme(l), Sme(r)) => try Opt(f(l, r)) catch {
+  //      case e: Exception => Non
+  //    }
+  //    case _ => Non
+  //  }
 
-  def map2[B, C](that: Opt[B])(f: (A, B) => C): Opt[C] = (this, that) match {
-    case (Sme(l), Sme(r)) => try Opt(f(l, r)) catch {
-      case e: Exception => Non
-    }
-    case _ => Non
-  }
+  def map2[B, C](that: Opt[B])(f: (A, B) => C): Opt[C] = for (a <- this; b <- that) yield f(a, b)
 }
 
 case object Non extends Opt[Nothing] {
@@ -124,6 +123,15 @@ class OptionSample {
   def testMap2(): Unit = {
     assert(Opt("1s").map2(Opt("0"))((l, r) => l.concat(r).toInt).isEmpty)
     assert(10 == Opt("1").map2(Opt("0"))((l, r) => l.concat(r).toInt).get)
+  }
+
+  @Test
+  def testForComprehension(): Unit = {
+    Opt("One").flatMap(s => Opt(s.length)).flatMap(i => Opt(i % 2 == 0)).get.ensuring(_ == false)
+    for {s <- Opt.empty[String]
+         i <- Opt(s.length)
+         even <- Opt(i % 2 == 0)
+    } even.ensuring(_ == true) // does not matter, ensuring will never be executed
   }
 
   @Test
