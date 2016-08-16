@@ -108,7 +108,7 @@ case class State[S, +A](run: S => (A, S)) {
 
   def map[B](f: A => B): State[S, B] = flatMap[A,B](a => State.unit(f(a)))
 
-  def filter(p: A => Boolean): State[S, A] = this //to use for syntactic sugar
+  def filter(p: A => Boolean): State[S, A] = this //to use syntactic sugar,
 
   def map2[B, C](b: State[S, B])(f: (A, B) => C): State[S, C] = flatMap[A,C](a => b.map(b => f(a, b)))
 
@@ -212,7 +212,7 @@ class StateSample {
   }
 
   @Test
-  def testsimulateMachine(): Unit = {
+  def testSimulateMachine(): Unit = {
     println(Machine(locked = true, 10, 0).react(Nil))
     println(Machine(locked = true, 10, 0).react(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)))
     println(Machine.simulateMachine(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)).run(Machine(locked = true, 10, 0)))
