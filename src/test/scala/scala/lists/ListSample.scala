@@ -2,6 +2,8 @@ package scala.lists
 
 import org.junit.{Assert, Test}
 
+import scala.annotation.tailrec
+
 class ListSample {
   @Test
   def listSample(): Unit = {
@@ -165,4 +167,55 @@ class ListSample {
   }
 
 
+  def maxSubList(xs: List[Int]): List[Int] = {
+    @tailrec
+    def loop(mxsq: List[Int], tmpsub: List[Int], xs: List[Int]): List[Int] = xs match {
+      case x :: rs =>
+        val sub = x :: tmpsub
+        loop(if (sub.sum > mxsq.sum) sub else mxsq, if (sub.sum > 0) sub else Nil, rs)
+      case Nil => mxsq
+    }
+    loop(List.empty[Int], List.empty[Int], xs).reverse
+  }
+
+  @Test
+  def testMaxSubList(): Unit = {
+    val l1 = maxSubList(List(-2, 1, -3, 4, -1, 2, 1, -5, 4))
+    println(s"l1=$l1, l1.sum=${l1.sum}")
+    val l2 = maxSubList(List(9, -2, 1, -3, 4, -1, 2, 1, -5, 11, 4))
+    println(s"l2=$l2, l1.sum=${l2.sum}")
+    val l3 = maxSubList(List(-2, 1, -3))
+    println(s"l1=$l3, l1.sum=${l3.sum}")
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
