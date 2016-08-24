@@ -2,6 +2,10 @@ package fp.design.combinator
 
 import java.util.concurrent.{Callable, TimeUnit, Future, ExecutorService}
 
+import org.junit.Test
+
+import scala.annotation.tailrec
+
 
 //sealed trait Par[+A] {
 //  def get: A
@@ -20,8 +24,6 @@ private case class UnitFuture[A](get: A) extends Future[A] {
 }
 
 object Par {
-
-
   def unit[A](a: A): Par[A] = es => UnitFuture(a)
 
   def fork[A](a: => Par[A]): Par[A] = es => es.submit(new Callable[A] {
@@ -29,6 +31,8 @@ object Par {
   })
 
   def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
+
+  def async[A, B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
 
   def run[A](par: Par[A])(es: ExecutorService): Future[A] = par(es)
 
@@ -40,10 +44,29 @@ object Par {
     UnitFuture(f(af.get, bf.get))
   }
 
-  def async[A, B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
+  def map[A, B](p: Par[A])(f: A => B): Par[B] = map2(p, unit(()))((a, _) => f(a))
+
+  def sortPar(lp: Par[List[Int]]): Par[List[Int]] = map(lp)(_.sorted)
+
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] = {
+    @tailrec
+    def loop(plst: Par[List[A]], pars: List[Par[A]]): Par[List[A]] = pars match {
+      case Nil => plst
+      case x :: rs => loop(map2(x, fork(plst))(_ :: _), rs)
+    }
+    loop(unit(List.empty[A]), ps)
+  }
+
+  def parMap[A, B](lp: List[A])(f: A => B): Par[List[B]] = fork(sequence(lp.map(async(f))))
+
+  def parFilter[A](xs: List[A])(f: A => Boolean): Par[List[A]] = parMap(xs.filter(f))(identity)
 }
 
 class ParSample {
-
+  @Test
+  def testMap(): Unit = {
+    val x = 9
+    Par.map(Par.unit(x))(identity) == Par.unit(identity(x))
+  }
 
 }
