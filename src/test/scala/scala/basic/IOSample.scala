@@ -1,5 +1,4 @@
-package com.scala.basic
-
+package scala.basic
 
 import org.junit.Test
 
