@@ -1,13 +1,12 @@
 package fp.design.combinator
 
 import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.{CountDownLatch, ExecutorService, Executors, TimeUnit}
 
-import com.twitter.util.CountDownLatch
 import org.junit.Test
 
-import scala.annotation.tailrec
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.duration._
+import scala.util.{Success, Try}
 import scalaz.concurrent.Actor
 
 sealed trait Future[A] {
@@ -31,14 +30,17 @@ object Par {
 
   def async[A, B](f: A => Try[B]): A => Par[B] = a => lazyUnit(f(a))
 
-  def run[A](es: ExecutorService)(p: Par[A]): Option[A] = {
+  def run[A](es: ExecutorService, timeout: Duration = 9.seconds)(p: Par[A]): Option[A] = {
     val ref = new AtomicReference[A]
     val latch = new CountDownLatch(1)
     p(es) {
       case Success(a) => ref.set(a); latch.countDown()
-      case Failure(_) => latch.countDown()
+      case _ => latch.countDown()
     }
-    latch.await()
+    Try(latch.await(timeout.toMillis, TimeUnit.MILLISECONDS)).filter(_ == false).foreach { x =>
+      println(x)
+      throw new IllegalStateException("Par execution failed, should use Try with recover() to error handling.")
+    }
     Option(ref.get)
   }
 
@@ -56,6 +58,8 @@ object Par {
           case Some(a)=> eval(es)(p(f(a,b)))
         }
       }
+      // If any of pa or pb is going wrong, message will never be sent to combiner
+      // hence f(a,b) will never be called, and Par[C] will never be executed
       run(es)(pa).foreach(combiner ! Left(_))
       run(es)(pb).foreach(combiner ! Right(_))
     }
@@ -65,18 +69,11 @@ object Par {
 
   def sortPar(lp: Par[List[Int]]): Par[List[Int]] = map(lp)(xs => Try(xs.sorted))
 
-  def sequence[A](ps: List[Par[A]]): Par[List[A]] = {
-    @tailrec
-    def loop(plst: Par[List[A]], pars: List[Par[A]]): Par[List[A]] = pars match {
-      case Nil => plst
-      case x :: rs => loop(map2(x, fork(plst))((h, t) => Try(h :: t)), rs)
-    }
-    loop(unit(Try(List.empty[A])), ps)
-  }
+  def sequence[A](ps: List[Par[A]]): Par[List[A]] = ps.foldRight[Par[List[A]]](unit(Try(List.empty[A])))((h,t)=>map2(h,t)((x,xs)=>Try(x::xs)))
 
   def parMap[A, B](lp: List[A])(f: A => Try[B]): Par[List[B]] = fork(sequence(lp.map(async(f))))
 
-  //def parFilter[A](xs: List[A])(f: A => Try[Boolean]): Par[List[A]] = parMap(xs.filter(f.andThen(_.getOrElse(false))))(identity)
+  def parFilter[A](xs: List[A])(f: A => Try[Boolean]): Par[List[A]] = parMap(xs.filter(f.andThen(_.getOrElse(true))))(a => Try(identity(a)))
 }
 
 class ParSample {
@@ -87,13 +84,10 @@ class ParSample {
   }
 
   @Test
-  def testLazyUnit(): Unit = {
-    val x = Par.run(Executors.newWorkStealingPool())(Par.lazyUnit({
-      Try("a".toInt)
-    }))
-    println(x)
+  def testAsyncWithoutRecovery(): Unit = {
+    val ps = List("a", "b", "c").map(Par.async(i => Try(i.toInt)))
+    println(ps.map(Par.run(Executors.newWorkStealingPool())(_)))
   }
-
 
   @Test
   def testMap2(): Unit = {
@@ -115,7 +109,7 @@ class ParSample {
 
   @Test
   def testParMap(): Unit = {
-    val p = Par.parMap(List.range(1, 1000))(i => Try(i * 2))
+    val p = Par.parMap(List.range(1, 100))(i => Try(i * 2))
     val x = Par.run(Executors.newWorkStealingPool())(p)
     println(x)
   }
