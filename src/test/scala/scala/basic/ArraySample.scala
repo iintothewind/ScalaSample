@@ -28,9 +28,25 @@ class ArraySample {
   }
 
   @Test
-  def arrayCompare(): Unit = {
+  def testCompare(): Unit = {
     val left = 1.to(3).toArray
-    val right = 3.to(1).toArray
-    left.sameElements(right)
+    val right = 1.to(3).toArray
+    val reversed = 3.to(1).toArray
+    left.sameElements(right).ensuring(_ == true) // same elements with same order
+    left.sameElements(reversed).ensuring(_ == false)
+  }
+
+  @Test
+  def testDeepCompare(): Unit = {
+    val left = 1.to(3).toArray
+    val right = 1.to(3).toArray
+    assert(left.deep == right.deep)
+  }
+
+  @Test
+  def testCorresponds(): Unit = {
+    val left = 1.to(3).toArray
+    val right = 1.to(3).toArray
+    left.corresponds(right)(_ == _)
   }
 }
