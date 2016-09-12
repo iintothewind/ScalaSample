@@ -18,9 +18,10 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-concurrent" % "7.2.5",
   "com.twitter" %% "util-collection" % "6.35.0",
   "com.google.code.findbugs" % "jsr305" % "3.0.1",
+  "com.google.guava" % "guava" % "19.0",
   "junit" % "junit" % "4.12" % Test,
-  "com.google.guava" % "guava" % "19.0" % Test,
   "org.assertj" % "assertj-core" % "3.3.0" % Test,
+  "org.scalacheck" %% "scalacheck" % "1.13.2" % "test",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.3" % Test,
   "org.scala-lang" %% "scala-actors-migration" % "1.1.0" % Test
 )

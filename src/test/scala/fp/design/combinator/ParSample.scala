@@ -139,8 +139,9 @@ class ParSample {
   }
 
   @Test
-  def testChoice(): Unit = {
-
+  def testChooser(): Unit = {
+    Par.unit(Try(List(9, -2, 3, -6, 5, 2, 1))).chooser(xs => Par.lazyUnit(Try(xs.max)))
+      .runWith(Executors.newWorkStealingPool())
+      .foreach(_.ensuring(_ == 9))
   }
-
 }
