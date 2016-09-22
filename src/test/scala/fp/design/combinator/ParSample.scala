@@ -71,7 +71,6 @@ object Par {
         case Left(Failure(e)) => eval(es)(p(Failure(e)))
         case Right(Failure(e)) => eval(es)(p(Failure(e)))
       }
-      // If any of pa or pb is going wrong, Failure(e) will be returned, hence eval(es)(p(Failure(e))) will never be called
       combiner ! Left(run(es)(la))
       combiner ! Right(run(es)(lb))
     }
