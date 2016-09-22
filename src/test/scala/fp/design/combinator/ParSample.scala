@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CountDownLatch, ExecutorService, Executors, TimeUnit}
 
 import org.junit.Test
-
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz.concurrent.Actor
@@ -21,6 +20,8 @@ sealed case class Par[A](task: Async[A]) {
   def chooser[B](choose: A => Async[B]): Par[B] = Par(Par.chooser(task)(choose))
 
   def runWith(es: ExecutorService, timeout: Duration = 9.seconds): Try[A] = Par.run(es, timeout)(task)
+
+  def run(timeout: Duration = 9.seconds)(implicit executor: ExecutorService): Try[A] = Par.run(executor, timeout)(task)
 }
 
 object Par {
@@ -95,52 +96,43 @@ class ParSample {
   @Test
   def testAsync(): Unit = {
     val ps = List("a", "b", "c").map(Par.async(i => Try(i.toInt).recover { case _ => 0 }))
-    ps.map(_.runWith(Executors.newWorkStealingPool())).foreach(_.ensuring(_.isSuccess))
+    ps.map(_.run()).foreach(_.ensuring(_.isSuccess))
   }
 
   @Test
   def testAsyncWithoutRecovery(): Unit = {
-    Par.lazyUnit(Try("a".toInt)).runWith(Executors.newWorkStealingPool()).ensuring(_.isFailure)
+    Par.lazyUnit(Try("a".toInt)).run().ensuring(_.isFailure)
   }
 
   @Test
   def testMap2(): Unit = {
     val mp2 = Par.map2(Par.lazyUnit(Try("a".toInt).recover { case _ => 0 }), Par.lazyUnit(Try("b".toInt).recover { case _ => 0 }))((l, r) => Try(l + r))
-    mp2.runWith(Executors.newWorkStealingPool()).foreach(_.ensuring(_ == 0))
+    mp2.run().foreach(_.ensuring(_ == 0))
   }
 
   @Test
   def testMap(): Unit = {
-    Par.map(Par.lazyUnit(Try("a".toInt).recover { case _ => 0 }))(i => Try(i + 1))
-      .runWith(Executors.newWorkStealingPool()).foreach(_.ensuring(_ == 1))
+    Par.map(Par.lazyUnit(Try("a".toInt).recover { case _ => 0 }))(i => Try(i + 1)).run().foreach(_.ensuring(_ == 1))
   }
 
   @Test
   def testSortPar(): Unit = {
     val lst = List(9, -2, 3, -6, 5, 2, 1)
-    Par.sortPar(Par.lazyUnit(Try(lst)))
-      .runWith(Executors.newWorkStealingPool())
-      .foreach(_.ensuring(_ == lst.sorted))
+    Par.sortPar(Par.lazyUnit(Try(lst))).run().foreach(_.ensuring(_ == lst.sorted))
   }
 
   @Test
   def testParMap(): Unit = {
-    Par.parMap(List.range(1, 100))(i => Try(i * 2))
-      .runWith(Executors.newWorkStealingPool())
-      .foreach(_.ensuring(_ == List.range(1, 100).map(_ * 2)))
+    Par.parMap(List.range(1, 100))(i => Try(i * 2)).run().foreach(_.ensuring(_ == List.range(1, 100).map(_ * 2)))
   }
 
   @Test
   def testParMapWithoutRecovery(): Unit = {
-    Par.parMap(List("b", "a", "2", "3", "4", "5"))(i => Try(i.toInt))
-      .runWith(Executors.newWorkStealingPool())
-      .isFailure
+    Par.parMap(List("b", "a", "2", "3", "4", "5"))(i => Try(i.toInt)).run().isFailure
   }
 
   @Test
   def testChooser(): Unit = {
-    Par.unit(Try(List(9, -2, 3, -6, 5, 2, 1))).chooser(xs => Par.lazyUnit(Try(xs.max)))
-      .runWith(Executors.newWorkStealingPool())
-      .foreach(_.ensuring(_ == 9))
+    Par.unit(Try(List(9, -2, 3, -6, 5, 2, 1))).chooser(xs => Par.lazyUnit(Try(xs.max))).run().foreach(_.ensuring(_ == 9))
   }
 }
