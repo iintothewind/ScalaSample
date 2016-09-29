@@ -1,7 +1,8 @@
 package fp.design.combinator
 
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.{CountDownLatch, ExecutorService, Executors, TimeUnit}
+import java.util.concurrent._
 
 import org.junit.Test
 import scala.concurrent.duration._
@@ -44,15 +45,15 @@ object Par {
   def async[A, B](f: A => Try[B]): A => Async[B] = a => lazyUnit(f(a))
 
   def run[A](es: ExecutorService, timeout: Duration = 9.seconds)(a: Async[A]): Try[A] = {
-    val ref = new AtomicReference[A]
+    val ref = new AtomicReference[Try[A]]
     val latch = new CountDownLatch(1)
     a(es) {
-      case Success(v) => ref.set(v); latch.countDown()
-      case _ => latch.countDown()
+      case s@Success(_) => ref.set(s); latch.countDown()
+      case f@Failure(_) => ref.set(f); latch.countDown()
     }
     Try(latch.await(timeout.toMillis, TimeUnit.MILLISECONDS)).flatMap {
-      case true if Option(ref.get).nonEmpty => Success(ref.get)
-      case _ => Failure(new IllegalStateException("Par execution error, should use Try with recover() for error handling"))
+      case true => ref.get
+      case _ => Failure(new TimeoutException("Par execution timeout."))
     }
   }
 
@@ -101,7 +102,7 @@ class ParSample {
 
   @Test
   def testAsyncWithoutRecovery(): Unit = {
-    Par.lazyUnit(Try("a".toInt)).run().ensuring(_.isFailure)
+    Par.lazyUnit(Try("a".toInt)).run().isFailure
   }
 
   @Test
