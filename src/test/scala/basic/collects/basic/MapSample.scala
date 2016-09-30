@@ -6,6 +6,7 @@ import org.junit.Test
 
 import scala.collection.immutable.TreeMap
 import scala.collection.{immutable, mutable}
+import scala.io.Source
 
 class MapSample {
   @Test
@@ -59,6 +60,14 @@ class MapSample {
     }
     assert(Map("See" -> 1, "Spot" -> 2, "Run" -> 3) == countWords("See Spot Run. Run, Spot. Run!"))
     assert(Map("Run" -> 3, "Spot" -> 2, "See" -> 1) == countWords("See Spot Run. Run, Spot. Run!"))
+  }
+
+
+  @Test
+  def testWordCounting(): Unit = {
+    Source.fromFile("README.md").getLines().flatMap(_.split("[ ,.!;]+"))
+      .foldLeft(Map.empty[String, Int])((map, word) => map.+(word -> (map.getOrElse(word, 0) + 1)))
+      .toList.sortBy(_._2)(Ordering[Int].reverse).foreach(println)
   }
 
   @Test
