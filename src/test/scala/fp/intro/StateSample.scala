@@ -106,11 +106,13 @@ case class State[S, +A](run: S => (A, S)) {
     f(a).run(nst)
   })
 
-  def map[B](f: A => B): State[S, B] = flatMap[A,B](a => State.unit(f(a)))
+  def map[B](f: A => B): State[S, B] = flatMap[A, B](a => State.unit(f(a)))
 
-  def filter(p: A => Boolean): State[S, A] = this //to use syntactic sugar,
+  def filter(p: A => Boolean): State[S, A] = this //to use syntactic sugar
 
-  def map2[B, C](b: State[S, B])(f: (A, B) => C): State[S, C] = flatMap[A,C](a => b.map(b => f(a, b)))
+  def withFilter(p: A => Boolean): State[S, A] = this
+
+  def map2[B, C](b: State[S, B])(f: (A, B) => C): State[S, C] = flatMap[A, C](a => b.map(b => f(a, b)))
 
   def get: State[S, S] = State(s => (s, s))
 
@@ -155,10 +157,10 @@ sealed case class Machine(locked: Boolean, candies: Int, coins: Int) {
 
 object Machine {
 
-  def react(input: Input): State[Machine, (Int, Int)] = State[Machine, (Int, Int)](machine=> (machine, input) match {
-    case (Machine(true, candies, coins), Coin) if candies > 0 => ((candies, coins + 1),Machine(locked = false, candies, coins+1))
-    case (Machine(false, candies, coins), Turn) => ((candies - 1, coins),Machine(locked = true, candies - 1, coins))
-    case _=>((machine.candies,machine.coins),machine)
+  def react(input: Input): State[Machine, (Int, Int)] = State[Machine, (Int, Int)](machine => (machine, input) match {
+    case (Machine(true, candies, coins), Coin) if candies > 0 => ((candies, coins + 1), Machine(locked = false, candies, coins + 1))
+    case (Machine(false, candies, coins), Turn) => ((candies - 1, coins), Machine(locked = true, candies - 1, coins))
+    case _ => ((machine.candies, machine.coins), machine)
   })
 
   def react(inputs: List[Input]): State[Machine, List[(Int, Int)]] = State.sequence(inputs.map(react))
@@ -190,8 +192,8 @@ class StateSample {
 
   @Test
   def testFlatMaps(): Unit = {
-    val ns = Rng.nextInt(99).flatMap[Int,List[Int]](x =>
-      Rng.nextInt(9).flatMap[Int,List[Int]](y =>
+    val ns = Rng.nextInt(99).flatMap[Int, List[Int]](x =>
+      Rng.nextInt(9).flatMap[Int, List[Int]](y =>
         Rng.sequence(List.fill(9)(Rng.nextInt(x))).map(xs => xs.map(_ % (y + 1)))
       )
     )
