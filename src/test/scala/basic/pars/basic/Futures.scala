@@ -1,10 +1,11 @@
 package basic.pars.basic
 
+import java.util.concurrent.TimeUnit
+
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.{Rule, Test}
 
-import scala.actors.threadpool.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
