@@ -4,6 +4,21 @@ version := "1.0"
 
 scalaVersion := "2.12.0"
 
+lazy val scalaSample = (project in file(".")).
+  settings(
+    name := "ScalaSample",
+    version := "1.0",
+    scalaVersion := "2.12.0",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-feature",
+      "-encoding","UTF-8",
+      "-unchecked",
+      "-Xlint",
+      "-Ywarn-dead-code"
+    )
+  )
+
 ivyScala := ivyScala.value map {
   _.copy(overrideScalaVersion = true)
 }
