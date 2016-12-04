@@ -1,49 +1,41 @@
 package puzzles
 
 import org.junit.Test
-import puzzles.Location.BMember
-import puzzles.Location.BConstructor
-import puzzles.Location.BEvery
-
-object Location {
-
-  trait A {
-    val audience: String
-    println("Hello " + audience)
-  }
-
-  class BMember(a: String = "World") extends A {
-    val audience = a
-    println("I repeat: Hello " + audience)
-  }
-
-  class BConstructor(override val audience: String = "World") extends A {
-    println("I repeat: Hello " + audience)
-  }
 
 
-  trait B {
-    val audience: String
-    println("Hello " + audience)
-  }
-
-  trait AfterB {
-    val introduction: String
-    println(introduction)
-  }
-
-  class BEvery(override val audience: String) extends {
-    override val introduction = {
-      println("Evaluating early def")
-      "Are you there?"
-    }
-  } with B with AfterB {
-    println("I repeat: Hello " + audience)
-  }
-
-
+trait A {
+  val audience: String
+  println("Hello " + audience)
 }
 
+class BMember(a: String = "World") extends A {
+  val audience = a
+  println("I repeat: Hello " + audience)
+}
+
+class BConstructor(override val audience: String = "World") extends A {
+  println("I repeat: Hello " + audience)
+}
+
+
+trait B {
+  val audience: String
+  println("Hello " + audience)
+}
+
+trait AfterB {
+  val introduction: String
+  println(introduction)
+}
+
+class BEvery(override val audience: String) extends {
+  override val introduction = {
+    println("Evaluating early def")
+    "Are you there?"
+  }
+} with B with AfterB {
+  println("I repeat: Hello " + audience)
+}
 
 class Location {
   /** According to the language specification, the initialization sequence for
