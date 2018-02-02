@@ -9,5 +9,5 @@ package object combinator {
 
   implicit def asyncToPar[A](a: Async[A]): Par[A] = Par(a)
 
-  implicit lazy val executorService = Executors.newWorkStealingPool
+  implicit lazy val executorService: ExecutorService = Executors.newWorkStealingPool
 }

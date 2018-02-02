@@ -61,14 +61,14 @@ object Par {
     override private[combinator] def apply(p: PartialFunction[Try[C], Unit]): Unit = {
       var oa: Option[A] = None
       var ob: Option[B] = None
-      val combiner = Actor[Either[Try[A],Try[B]]]{
+      val combiner = Actor[Either[Try[A], Try[B]]] {
         case Left(Success(a)) => ob match {
           case None => oa = Some(a)
-          case Some(b) => eval(es)(p(f(a,b)))
+          case Some(b) => eval(es)(p(f(a, b)))
         }
-        case Right(Success(b))=> oa match {
+        case Right(Success(b)) => oa match {
           case None => ob = Some(b)
-          case Some(a)=> eval(es)(p(f(a,b)))
+          case Some(a) => eval(es)(p(f(a, b)))
         }
         case Left(Failure(e)) => eval(es)(p(Failure(e)))
         case Right(Failure(e)) => eval(es)(p(Failure(e)))
@@ -82,7 +82,7 @@ object Par {
 
   def sortPar(al: Async[List[Int]]): Async[List[Int]] = map(al)(xs => Try(xs.sorted))
 
-  def sequence[A](la: List[Async[A]]): Async[List[A]] = la.foldRight[Async[List[A]]](unit(Try(List.empty[A])))((h,t)=>map2(h,t)((x,xs)=>Try(x::xs)))
+  def sequence[A](la: List[Async[A]]): Async[List[A]] = la.foldRight[Async[List[A]]](unit(Try(List.empty[A])))((h, t) => map2(h, t)((x, xs) => Try(x :: xs)))
 
   def parMap[A, B](xs: List[A])(f: A => Try[B]): Async[List[B]] = fork(sequence(xs.map(async(f))))
 

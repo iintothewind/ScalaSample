@@ -1,28 +1,34 @@
+import org.ensime.EnsimeCoursierKeys._
+import org.ensime.EnsimeKeys._
+
 name := "ScalaSample"
-
 version := "1.0"
-
-scalaVersion := "2.12.0"
+scalaVersion := "2.12.4"
 
 lazy val scalaSample = (project in file(".")).
   settings(
     name := "ScalaSample",
     version := "1.0",
-    scalaVersion := "2.12.0",
+    scalaVersion := "2.12.3",
     scalacOptions ++= Seq(
       "-deprecation",
       "-feature",
-      "-encoding","UTF-8",
-      "-unchecked",
-      "-Xlint",
-      "-Ywarn-dead-code"
+      "-encoding", "UTF-8"
+//      "-unchecked",
+//      "-Xlint",
+//      "-Ywarn-dead-code"
     )
   )
 
-ivyScala := ivyScala.value map {
-  _.copy(overrideScalaVersion = true)
-}
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v")
+shellPrompt := { s => Project.extract(s).currentProject.id + "> " }
 
+//ivyScala := ivyScala.value map {
+//  _.copy(overrideScalaVersion = true)
+//}
+
+ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/groups/public"
+ensimeIgnoreScalaMismatch in ThisBuild := true
 resolvers ++= {
   Seq(Resolver.sonatypeRepo("releases"))
 }
@@ -35,5 +41,8 @@ libraryDependencies ++= Seq(
   "com.google.code.findbugs" % "jsr305" % "3.0.1",
   "com.google.guava" % "guava" % "19.0",
   "junit" % "junit" % "4.12" % Test,
-  "org.assertj" % "assertj-core" % "3.3.0" % Test
+  "org.assertj" % "assertj-core" % "3.3.0" % Test,
+  "org.openjdk.jmh" % "jmh-core" % "1.17.4" % Test,
+  "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.17.4" % Test,
+  "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.1.jre8"
 )

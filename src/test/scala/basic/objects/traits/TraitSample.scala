@@ -34,11 +34,11 @@ trait HasLegs {
 }
 
 /**
- * Mixin a trait using extends, Mixin more than one trait using extends then with
- * when you call a method on a class with multiple trait mixins,
- * the method in the trait furthest to the right is called first,
- * if that method calls super, it invokes the method in the next trait to its left, and so on
- */
+  * Mixin a trait using extends, Mixin more than one trait using extends then with
+  * when you call a method on a class with multiple trait mixins,
+  * the method in the trait furthest to the right is called first,
+  * if that method calls super, it invokes the method in the next trait to its left, and so on
+  */
 class TraitSample {
 
 
@@ -93,9 +93,9 @@ class TraitSample {
   class BasicIntQueue extends IntQueue {
     private val buf = new ArrayBuffer[Int]()
 
-    def get() = buf.remove(0)
+    def get(): Int = buf.remove(0)
 
-    def put(x: Int) = buf += x
+    def put(x: Int): Unit = buf += x
   }
 
   @Test

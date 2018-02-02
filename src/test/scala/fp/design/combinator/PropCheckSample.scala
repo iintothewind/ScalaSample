@@ -13,10 +13,10 @@ object StringSpecification extends Properties("String") {
 }
 
 object ListSpecification extends Properties("List") {
-  val gen = for {lst <- Gen.nonEmptyListOf(Gen.choose(0, 100))} yield (lst, lst(Random.nextInt(lst.length)))
+  val gen: Gen[(List[Int], Int)] = for {lst <- Gen.nonEmptyListOf(Gen.choose(0, 100))} yield (lst, lst(Random.nextInt(lst.length)))
   property("max") = forAll(gen) { case (xs, x) => xs.contains(x) && xs.max >= x }
 
-  val lstgen = for {
+  val lstgen: Gen[(List[Int], Int)] = for {
     lst <- Gen.nonEmptyListOf(Gen.choose(0, 100))
     e <- Gen.oneOf(lst)
   } yield (lst, e)

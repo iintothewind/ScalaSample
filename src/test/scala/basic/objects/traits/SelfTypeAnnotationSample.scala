@@ -14,10 +14,10 @@ trait Tweeter {
 }
 
 /**
- * Error:(16, 21) illegal inheritance;
- * self-type Right does not conform to Tweeter's selftype Tweeter with User
- * trait Right extends Tweeter  {
- **/
+  * Error:(16, 21) illegal inheritance;
+  * self-type Right does not conform to Tweeter's selftype Tweeter with User
+  * trait Right extends Tweeter  {
+  **/
 class Right extends Tweeter with User {
   override def name: String = "Mr.right"
 }
