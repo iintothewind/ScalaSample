@@ -29,6 +29,7 @@ shellPrompt := { s => Project.extract(s).currentProject.id + "> " }
 
 ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/groups/public"
 ensimeIgnoreScalaMismatch in ThisBuild := true
+ensimeJavaFlags in ThisBuild := Seq("-Xss512M", "-Xmx4G", "-XX:MaxMetaspaceSize=768M")
 resolvers ++= {
   Seq(Resolver.sonatypeRepo("releases"))
 }
