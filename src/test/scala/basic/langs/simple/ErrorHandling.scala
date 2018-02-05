@@ -11,7 +11,7 @@ class ErrorHandling {
 
   @Test
   def testRead(): Unit = {
-    Source.fromFile(sys.props.get("user.dir").getOrElse(".").concat("/pom.xml")).getLines().foreach(println)
+    Source.fromFile(sys.props.get("user.dir").getOrElse(".").concat("/build.sbt")).getLines().foreach(println)
   }
 
   @Test(expected = classOf[FileNotFoundException])

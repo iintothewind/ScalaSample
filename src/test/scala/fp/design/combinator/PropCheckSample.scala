@@ -20,7 +20,13 @@ object ListSpecification extends Properties("List") {
     lst <- Gen.nonEmptyListOf(Gen.choose(0, 100))
     e <- Gen.oneOf(lst)
   } yield (lst, e)
+  val sameValLstGen: Gen[(List[Int], Int)] = for {
+    lst <- Gen.nonEmptyListOf(Gen.const(5))
+    e <- Gen.oneOf(lst)
+  } yield (lst,e)
   property("contains") = forAll(lstgen) { case (xs, x) => xs.contains(x) }
+  property("sum") = forAll(lstgen) { case(xs, x) => xs.sum == xs.reverse.sum }
+  property("sum") = forAll(sameValLstGen) { case(xs,x) => xs.sum == xs.head * xs.size }
 }
 
 class PropCheckSample {

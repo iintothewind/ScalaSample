@@ -259,7 +259,7 @@ class QuickTour {
   @Test
   def structuralType(): Unit = {
     //BufferedReader and other actual parameters have the same father type: {def close() : Unit}
-    assert(loading(Source.fromFile(new File("build.sbt")).bufferedReader())(_.readLine()).contains("Scala"))
+    assert(loading(Source.fromFile(new File("build.sbt")).bufferedReader())(_.readLine()).length > 0)
   }
 
   object Color extends Enumeration {

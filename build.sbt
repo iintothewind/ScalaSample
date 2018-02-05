@@ -42,6 +42,7 @@ libraryDependencies ++= Seq(
   "com.google.code.findbugs" % "jsr305" % "3.0.1",
   "com.google.guava" % "guava" % "19.0",
   "junit" % "junit" % "4.12" % Test,
+  "com.novocode" % "junit-interface" % "0.11" % Test,
   "org.assertj" % "assertj-core" % "3.3.0" % Test,
   "org.openjdk.jmh" % "jmh-core" % "1.17.4" % Test,
   "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.17.4" % Test,
