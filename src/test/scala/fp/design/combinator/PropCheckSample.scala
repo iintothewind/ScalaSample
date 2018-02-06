@@ -14,19 +14,17 @@ object StringSpecification extends Properties("String") {
 
 object ListSpecification extends Properties("List") {
   val gen: Gen[(List[Int], Int)] = for {lst <- Gen.nonEmptyListOf(Gen.choose(0, 100))} yield (lst, lst(Random.nextInt(lst.length)))
-  property("max") = forAll(gen) { case (xs, x) => xs.contains(x) && xs.max >= x }
-
   val lstgen: Gen[(List[Int], Int)] = for {
     lst <- Gen.nonEmptyListOf(Gen.choose(0, 100))
     e <- Gen.oneOf(lst)
   } yield (lst, e)
   val sameValLstGen: Gen[(List[Int], Int)] = for {
     lst <- Gen.nonEmptyListOf(Gen.const(5))
-    e <- Gen.oneOf(lst)
-  } yield (lst,e)
+    e <- Gen.const(5)
+  } yield (lst, e)
+  property("max") = forAll(gen) { case (xs, x) => xs.contains(x) && xs.max >= x }
   property("contains") = forAll(lstgen) { case (xs, x) => xs.contains(x) }
-  property("sum") = forAll(lstgen) { case(xs, x) => xs.sum == xs.reverse.sum }
-  property("sum") = forAll(sameValLstGen) { case(xs,x) => xs.sum == xs.head * xs.size }
+  property("sum") = forAll(lstgen) { case (xs, _) => xs.sum == xs.reverse.sum } && forAll(sameValLstGen) { case (xs, x) => xs.sum == x * xs.size }
 }
 
 class PropCheckSample {
