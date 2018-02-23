@@ -1,11 +1,15 @@
 package fp.design
 
-import java.util.concurrent.{Executors, ExecutorService}
+import java.util.concurrent.{ExecutorService, Executors}
+
+import fp.intro.Rng
 
 import scala.language.implicitConversions
 
 package object combinator {
-  type Async[A] = ExecutorService => Future[A]
+  type Async[A] = ExecutorService => Futre[A]
+
+  implicit val seed: Rng = Rng(0)
 
   implicit def asyncToPar[A](a: Async[A]): Par[A] = Par(a)
 

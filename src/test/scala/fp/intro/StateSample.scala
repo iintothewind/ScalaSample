@@ -4,7 +4,6 @@ import org.junit.Test
 import scala.annotation.tailrec
 
 case class Rng(seed: Long) {
-
   def nextInt: (Int, Rng) = {
     val newSeed = (Option(seed).filter(_ != 0).getOrElse(System.currentTimeMillis()) * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
     val nextRng = Rng(newSeed)
@@ -20,6 +19,8 @@ case class Rng(seed: Long) {
   def nextNonNegativeInt: (Int, Rng) = Rng.nextNonNegativeInt.run(this)
 
   def nextInt(bound: Int): (Int, Rng) = Rng.nextInt(bound).run(this)
+
+  def nextIntBetween(min: Int, maxExclusive: Int): (Int, Rng) = Rng.nextIntBetween(min, maxExclusive).run(this)
 
   //  def nextDouble: (Double, Rng) = {
   //    val (nonNegativeInt, rng) = nextNonNegativeInt
@@ -92,6 +93,8 @@ object Rng {
     case _ => nextInt(bound)
   })
 
+  def nextIntBetween(min: Int, maxExclusive: Int): Rand[Int] = nextInt(maxExclusive - min).map(_ + min)
+
   def nextDouble: Rand[Double] = map(nextNonNegativeInt)(_ / Int.MaxValue.toDouble)
 
   def intDouble: Rand[(Int, Double)] = map2(nextNonNegativeInt, nextDouble)((_, _))
@@ -139,6 +142,7 @@ object State {
       case Nil => (as, state)
       case x :: rs => val (xa, xstate) = x.run(state); loop(xa :: as, xstate, rs)
     }
+
     loop(Nil, initState, lst)
   })
 }

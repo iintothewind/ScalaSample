@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz.concurrent.Actor
 
-sealed trait Future[A] {
+sealed trait Futre[A] {
   private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit
 }
 
@@ -28,7 +28,7 @@ sealed case class Par[A](task: Async[A]) {
 object Par {
   def apply[A](a: => Try[A]): Par[A] = Par(lazyUnit(a))
 
-  def unit[A](t: Try[A]): Async[A] = es => new Future[A] {
+  def unit[A](t: Try[A]): Async[A] = es => new Futre[A] {
     override private[combinator] def apply(pf: PartialFunction[Try[A], Unit]): Unit = pf(t)
   }
 
@@ -36,7 +36,7 @@ object Par {
     override def run(): Unit = callback
   })
 
-  def fork[A](a: => Async[A]): Async[A] = es => new Future[A] {
+  def fork[A](a: => Async[A]): Async[A] = es => new Futre[A] {
     override private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit = eval(es)(a(es)(p))
   }
 
@@ -57,7 +57,7 @@ object Par {
     }
   }
 
-  def map2[A, B, C](la: Async[A], lb: Async[B])(f: (A, B) => Try[C]): Async[C] = es => new Future[C] {
+  def map2[A, B, C](la: Async[A], lb: Async[B])(f: (A, B) => Try[C]): Async[C] = es => new Futre[C] {
     override private[combinator] def apply(p: PartialFunction[Try[C], Unit]): Unit = {
       var oa: Option[A] = None
       var ob: Option[B] = None
@@ -78,7 +78,7 @@ object Par {
     }
   }
 
-  def map[A, B](async: Async[A])(f: A => Try[B]): Async[B] = map2(async, unit(Try()))((a, _) => f(a))
+  def map[A, B](async: Async[A])(f: A => Try[B]): Async[B] = map2(async, unit(Try(Unit)))((a, _) => f(a))
 
   def sortPar(al: Async[List[Int]]): Async[List[Int]] = map(al)(xs => Try(xs.sorted))
 
