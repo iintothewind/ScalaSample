@@ -7,11 +7,13 @@ import scala.util.{Failure, Success, Try}
 
 
 sealed case class Gn[A](state: State[Rng, A]) {
-  def sample(seed: Int): A = state.run(Rng(seed))._1
+  def sample(seed: Int = 0): A = state.run(Rng(seed))._1
 
   def map[B](f: A => B): Gn[B] = Gn(state.map(f))
 
-  def flatMap[B](f: A => State[Rng, B]): Gn[B] = Gn(state.flatMap(f))
+  //def flatMap[B](f: A => State[Rng, B]): Gn[B] = Gn(state.flatMap(f))
+
+  def flatMap[B](f: A => Gn[B]): Gn[B] = Gn(state.flatMap(f.andThen(_.state)))
 }
 
 sealed case class Prp(succNum: Int = 0, run: Try[Boolean]) {
@@ -42,22 +44,25 @@ object Gn {
 class GenSample {
   @Test
   def testUnit(): Unit = {
-    println(Gn.const(0).sample(0))
-
+    println(Gn.const(0).sample())
   }
 
   @Test
   def testRandInt(): Unit = {
-    println(Gn.randInt.sample(0))
+    println(Gn.randInt.sample())
   }
 
   @Test
   def testBetween(): Unit = {
-    println(Gn.between(1, 10).sample(0))
+    println(Gn.between(1, 10).sample())
   }
 
   @Test
   def testRandInts(): Unit = {
-    println(Gn.sequence(9)(Gn.between(1, 10)).sample(0))
+    println(Gn.sequence(9)(Gn.between(1, 10)).sample())
+  }
+
+  @Test
+  def testFlatMap(): Unit = {
   }
 }

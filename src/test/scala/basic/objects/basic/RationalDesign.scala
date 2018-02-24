@@ -4,6 +4,8 @@ import java.util.Objects
 
 import org.junit.Test
 
+import scala.language.implicitConversions
+
 
 class Rational(n: Int, d: Int) extends Ordered[Rational] {
   require(d != 0)

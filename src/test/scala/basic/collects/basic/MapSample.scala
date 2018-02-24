@@ -39,11 +39,10 @@ class MapSample {
   @Test
   def iterateJavaMap(): Unit = {
     val map: java.util.Map[Int, String] = new util.HashMap[Int, String]()
-    import scala.collection.JavaConversions._
     map.put(1, "one")
     map.put(2, "two")
     map.put(3, "three")
-    map.foreach(pair => println(pair._1 + " -> " + pair._2))
+    map.forEach((k, v) => println(s"$k->$v"))
   }
 
   @Test
@@ -58,6 +57,7 @@ class MapSample {
       }
       counts.toMap
     }
+
     assert(Map("See" -> 1, "Spot" -> 2, "Run" -> 3) == countWords("See Spot Run. Run, Spot. Run!"))
     assert(Map("Run" -> 3, "Spot" -> 2, "See" -> 1) == countWords("See Spot Run. Run, Spot. Run!"))
   }

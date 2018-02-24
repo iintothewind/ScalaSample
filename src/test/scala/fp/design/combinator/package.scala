@@ -9,8 +9,6 @@ import scala.language.implicitConversions
 package object combinator {
   type Async[A] = ExecutorService => Futre[A]
 
-  implicit val seed: Rng = Rng(0)
-
   implicit def asyncToPar[A](a: Async[A]): Par[A] = Par(a)
 
   implicit lazy val executorService: ExecutorService = Executors.newWorkStealingPool
