@@ -35,16 +35,11 @@ resolvers ++= {
 }
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.7",
-  "org.scalaz" %% "scalaz-concurrent" % "7.2.7",
+  "org.scalaz" %% "scalaz-core" % "7.2.20",
+  "org.scalaz" %% "scalaz-concurrent" % "7.2.20",
   "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.6" % Test,
-  "com.google.code.findbugs" % "jsr305" % "3.0.1",
-  "com.google.guava" % "guava" % "19.0",
+  "com.google.guava" % "guava" % "24.0-jre",
   "junit" % "junit" % "4.12" % Test,
   "com.novocode" % "junit-interface" % "0.11" % Test,
-  "org.assertj" % "assertj-core" % "3.3.0" % Test,
-  "org.openjdk.jmh" % "jmh-core" % "1.17.4" % Test,
-  "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.17.4" % Test,
-  "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.1.jre8"
 )

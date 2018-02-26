@@ -7,7 +7,7 @@ import org.junit.Test
 import util.Random
 
 class Rank {
-  val list = List.fill(50000)(Random.nextInt(2000))
+  val list: List[Int] = List.fill(50000)(Random.nextInt(2000))
 
   def cost(cnt: Int)(call: => Unit): Long = {
     val watch = Stopwatch.createStarted()

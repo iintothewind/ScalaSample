@@ -32,7 +32,7 @@ class CheckSample {
   def listPropSumChooseCheck(): Unit = {
     val intList = Gen.listOf(Gen.choose(0, 100))
     val sumProp = forAll(intList) { xs => xs.sum == xs.reverse.sum }
-    assert(Test.check(sumProp)(identity).passed)
+    assert(Test.check(sumProp)(p => p.withMaxSize(120)).passed)
   }
 
   @junit.Test
@@ -50,7 +50,7 @@ class CheckSample {
   }
 
   @junit.Test
-  def testGen():Unit = {
+  def testGen(): Unit = {
 
   }
 

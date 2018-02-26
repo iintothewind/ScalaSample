@@ -1,6 +1,5 @@
 package basic.collects.lists
 
-import org.assertj.core.api.Assertions
 import org.junit.Test
 
 class FirstOderOperations {
@@ -23,9 +22,9 @@ class FirstOderOperations {
   @Test
   def listPatterns(): Unit = {
     val List(apples, oranges, pears) = List("apples", "oranges", "pears")
-    Assertions.assertThat(apples.isInstanceOf[String]).isTrue
-    Assertions.assertThat(oranges.isInstanceOf[String]).isTrue
-    Assertions.assertThat(pears.isInstanceOf[String]).isTrue
+    apples.isInstanceOf[String].ensuring(true)
+    oranges.isInstanceOf[String].ensuring(true)
+    pears.isInstanceOf[String].ensuring(true)
   }
 
   @Test
@@ -77,9 +76,11 @@ class FirstOderOperations {
   @Test
   def testStringEmpty(): Unit = {
     def isEmpty1(s: String): Boolean = s == null || s.trim == ""
+
     // isEmpty2() is slower because it needs to traverse the whole list to find its end,
     // therefore, it takes more time in particular if the list is long
     def isEmpty2(s: String): Boolean = s == null || s.trim.length == 0
+
     assert(isEmpty1("     "))
     assert(isEmpty2("     "))
   }
@@ -145,6 +146,7 @@ class FirstOderOperations {
   @Test
   def splitAt(): Unit = {
     val list = "abcde".toCharArray.toList
+
     def assertSplitAt(position: Int): Unit = {
       val (taken, dropped) = list.splitAt(position)
       assert(taken == list.take(position))
@@ -233,6 +235,7 @@ class FirstOderOperations {
         case (_, Nil) => left
         case (leftFirst :: leftRest, rightFirst :: rightRest) => if (less(leftFirst, rightFirst)) leftFirst :: merge(leftRest, right) else rightFirst :: merge(left, rightRest)
       }
+
       val middle = list.length / 2
       if (middle == 0) list
       else {
@@ -240,6 +243,7 @@ class FirstOderOperations {
         merge(mergeSort(left)(less), mergeSort(right)(less))
       }
     }
+
     val list = List(9, 1, 5, 4, 3, 7, 8, 5, 2, 7, 6)
     assert(List(1, 2, 3, 4, 5, 5, 6, 7, 7, 8, 9) == mergeSort(list)(_ < _))
   }
