@@ -43,3 +43,4 @@ project/plugins/project/
 hs_err_pid*
 .ensime_cache
 .ensime
+.vscode
