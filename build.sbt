@@ -20,7 +20,7 @@ lazy val scalaSample = (project in file(".")).
     )
   )
 
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v")
+//testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v")
 shellPrompt := { s => Project.extract(s).currentProject.id + "> " }
 
 //ivyScala := ivyScala.value map {

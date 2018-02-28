@@ -3,9 +3,11 @@ package basic.collects.lists
 import java.util.concurrent.TimeUnit
 
 import com.google.common.base.Stopwatch
-import org.junit.Test
+import org.junit.{Ignore, Test}
+
 import util.Random
 
+@Ignore
 class Rank {
   val list: List[Int] = List.fill(50000)(Random.nextInt(2000))
 

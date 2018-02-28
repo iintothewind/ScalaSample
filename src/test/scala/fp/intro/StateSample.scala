@@ -56,7 +56,7 @@ case class Rng(seed: Long) {
   //    loop(Nil, count, this)
   //  }
 
-  def ints(count: Int): (List[Int], Rng) = Rng.sequence(List.fill(count)(Rng.nextInt)).run(this)
+  def ints(count: Int): (Seq[Int], Rng) = Rng.many(Seq.fill(count)(Rng.nextInt): _*).run(this)
 }
 
 object Rng {
@@ -79,7 +79,7 @@ object Rng {
 
   def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = State.map2(ra, rb)(f)
 
-  def sequence[A](lst: List[Rand[A]]): Rand[List[A]] = State.sequence(lst)
+  def many[A](rand: Rand[A]*): Rand[Seq[A]] = State.many(rand: _*)
 
   def nextInt: Rand[Int] = State(_.nextInt)
 
@@ -136,14 +136,14 @@ object State {
 
   def map2[S, A, B, C](ra: State[S, A], rb: State[S, B])(f: (A, B) => C): State[S, C] = flatMap(ra)(a => map(rb)(b => f(a, b)))
 
-  def sequence[S, A](lst: List[State[S, A]]): State[S, List[A]] = State(initState => {
+  def many[S, A](xs: State[S, A]*): State[S, Seq[A]] = State(initState => {
     @tailrec
-    def loop(as: List[A], state: S, sl: List[State[S, A]]): (List[A], S) = sl match {
+    def loop(as: Seq[A], state: S, sl: Seq[State[S, A]]): (Seq[A], S) = sl match {
       case Nil => (as, state)
-      case x :: rs => val (xa, xstate) = x.run(state); loop(xa :: as, xstate, rs)
+      case x +: rs => val (xa, xstate) = x.run(state); loop(xa +: as, xstate, rs)
     }
 
-    loop(Nil, initState, lst)
+    loop(Nil, initState, xs)
   })
 }
 
@@ -156,7 +156,7 @@ case object Turn extends Input
 sealed case class Machine(locked: Boolean, candies: Int, coins: Int) {
   def react(input: Input): Machine = Machine.react(input).run(this)._2
 
-  def react(inputs: List[Input]): Machine = Machine.react(inputs).run(this)._2
+  def react(inputs: Input*): Machine = Machine.react(inputs: _*).run(this)._2
 }
 
 object Machine {
@@ -167,9 +167,9 @@ object Machine {
     case _ => ((machine.candies, machine.coins), machine)
   })
 
-  def react(inputs: List[Input]): State[Machine, List[(Int, Int)]] = State.sequence(inputs.map(react))
+  def react(inputs: Input*): State[Machine, Seq[(Int, Int)]] = State.many(inputs.map(react): _*)
 
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = State.sequence(inputs.map(react)).map(_.head)
+  def simulateMachine(inputs: Input*): State[Machine, (Int, Int)] = State.many(inputs.map(react): _*).map(_.head)
 }
 
 
@@ -196,9 +196,9 @@ class StateSample {
 
   @Test
   def testFlatMaps(): Unit = {
-    val ns = Rng.nextInt(99).flatMap[Int, List[Int]](x =>
-      Rng.nextInt(9).flatMap[Int, List[Int]](y =>
-        Rng.sequence(List.fill(9)(Rng.nextInt(x))).map(xs => xs.map(_ % (y + 1)))
+    val ns = Rng.nextInt(99).flatMap[Int, Seq[Int]](x =>
+      Rng.nextInt(9).flatMap[Int, Seq[Int]](y =>
+        Rng.many(Seq.fill(9)(Rng.nextInt(x)): _*).map(xs => xs.map(_ % (y + 1)))
       )
     )
     println(ns.run(Rng(0)))
@@ -208,20 +208,20 @@ class StateSample {
   def testForComprehensions(): Unit = {
     val ns = for {x: Int <- Rng.nextInt(99)
                   y: Int <- Rng.nextInt(9)
-                  xs <- Rng.sequence(List.fill(9)(Rng.nextInt(x)))} yield xs.map(_ % (y + 1))
+                  xs <- Rng.many(Seq.fill(9)(Rng.nextInt(x)): _*)} yield xs.map(_ % (y + 1))
     println(ns.run(Rng(0)))
   }
 
   @Test
   def testNextIntLessThan(): Unit = {
-    println(Rng.sequence(List.fill(9)(Rng.nextInt(20))).run(Rng(0)))
+    println(Rng.many(Seq.fill(9)(Rng.nextInt(20)): _*).run(Rng(0)))
   }
 
   @Test
   def testSimulateMachine(): Unit = {
-    println(Machine(locked = true, 10, 0).react(Nil))
-    println(Machine(locked = true, 10, 0).react(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)))
-    println(Machine.simulateMachine(List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)).run(Machine(locked = true, 10, 0)))
+    println(Machine(locked = true, 10, 0).react())
+    println(Machine(locked = true, 10, 0).react(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn))
+    println(Machine.simulateMachine(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn).run(Machine(locked = true, 10, 0)))
   }
 
 

@@ -3,28 +3,21 @@ package fp.design.combinator
 import fp.intro.{Rng, State}
 import org.junit.Test
 
-import scala.util.{Failure, Success, Try}
-
 
 sealed case class Gn[A](state: State[Rng, A]) {
   def sample(implicit seed: Int = 0): A = state.run(Rng(seed))._1
+
+  def union(that: Gn[A]): Gn[A] = Gn.randBool.flatMap {
+    case true => this
+    case false => that
+  }
 
   def map[B](f: A => B): Gn[B] = Gn(state.map(f))
 
   def flatMap[B](f: A => Gn[B]): Gn[B] = Gn(state.flatMap(f.andThen(_.state)))
 
-  def many(size: Gn[Int]): Gn[List[A]] = size.flatMap(n => Gn(State.sequence(List.fill(n)(this.state))))
+  def many(size: Gn[Int]): Gn[Seq[A]] = size.flatMap(n => Gn(State.many(Seq.fill(n)(this.state): _*)))
 
-}
-
-sealed case class Prp(succNum: Int = 0, run: Try[Boolean]) {
-  def check: Either[String, Int] = run match {
-    case Success(true) => Right(succNum + 1)
-    case Success(false) => Left("test executed but failed")
-    case Failure(t) => Left(t.getMessage)
-  }
-
-  def and(p: Prp): Prp = Prp(succNum + p.succNum + 2, run.transform(_ => p.run, _ => p.run))
 }
 
 object Gn {
@@ -36,29 +29,32 @@ object Gn {
 
   def randDbl: Gn[Double] = Gn(State(_.nextDouble))
 
-  def bool: Gn[Boolean] = randInt.map(i => i % 2 match {
+  def randBool: Gn[Boolean] = randInt.map(i => i % 2 match {
     case 0 => true
     case _ => false
   })
 
-  def union[A](l: Gn[A], r: Gn[A]): Gn[A] = bool.flatMap {
+  def union[A](l: Gn[A], r: Gn[A]): Gn[A] = randBool.flatMap {
     case true => l
     case false => r
   }
 
   def weighted[A](l: (Gn[A], Double), r: (Gn[A], Double)): Gn[A] = randDbl.flatMap(d => if (d < (l._2 / (l._2 + r._2))) l._1 else r._1)
 
-  def randList[A](source: Gn[Array[A]])(implicit len: Gn[Int] = source.map(_.length)): Gn[List[A]] = source.flatMap(array => Gn.between(0, array.length).map(array(_)).many(len))
+  def oneOf[A](source: Gn[IndexedSeq[A]]): Gn[A] = source.flatMap(xs => Gn.between(0, xs.size).map(xs(_)))
 
-  def randStr(source: String, size: Gn[Int])(implicit len: Gn[Int] = const(source.length)): Gn[List[String]] = randList(Gn.const(source.toCharArray))(len).map(lst => String.valueOf(lst.toArray)).many(size)
+  def randSeq[A](source: Gn[IndexedSeq[A]])(implicit len: Gn[Int] = source.map(_.length)): Gn[Seq[A]] = oneOf(source).many(len)
 
-  def randLetters(size: Gn[Int])(len: Gn[Int]): Gn[List[String]] = Gn.randStr("abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", size)(len)
+  def randStr(source: String, size: Gn[Int])(implicit len: Gn[Int] = const(source.length)): Gn[Seq[String]] = randSeq(Gn.const(source: IndexedSeq[Char]))(len).map(xs => String.valueOf(xs.toArray)).many(size)
+
+  def randLetters(size: Gn[Int])(len: Gn[Int]): Gn[Seq[String]] = Gn.randStr("abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", size)(len)
+
 }
 
 class GenSample {
   @Test
   def testUnit(): Unit = {
-    println(Gn.const(0).sample)
+    Gn.const(0).sample.ensuring(_ == 0)
   }
 
   @Test
@@ -68,16 +64,27 @@ class GenSample {
 
   @Test
   def testBetween(): Unit = {
-    println(Gn.between(1, 10).sample)
+    Gn.between(1, 10).sample.ensuring(n => n >= 1 && n < 10)
   }
 
   @Test
   def testMany(): Unit = {
-    println(Gn.between(1, 10).many(Gn.between(1, 10)).sample)
+    Gn.between(1, 10).many(Gn.between(1, 10)).sample.ensuring(it => it.forall(n => (1 to 10).contains(n)))
+  }
+
+  @Test
+  def testOneOf(): Unit = {
+    "abcde".ensuring(it => it.contains(Gn.oneOf(Gn.const(it: IndexedSeq[Char])).sample))
   }
 
   @Test
   def testRandString(): Unit = {
     println(Gn.randLetters(Gn.between(5, 9))(Gn.between(5, 10)).sample)
   }
+
+  @Test
+  def testString(): Unit = {
+    println(IndexedSeq("abc").foreach(s => println(s.getClass)))
+  }
+
 }

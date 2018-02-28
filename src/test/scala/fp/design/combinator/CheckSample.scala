@@ -8,6 +8,8 @@ import org.scalacheck.{Gen, Properties, Test}
 import scala.util.Random
 
 object StringSpec extends Properties("String") {
+  override def overrideParameters(p: Test.Parameters): Test.Parameters = p.withMinSuccessfulTests(120)
+
   property("startsWith") = forAll { (a: String, b: String) => (a + b).startsWith(a) }
   property("concat") = forAll { (a: String, b: String) => a.concat(b).startsWith(a) && a.concat(b).endsWith(b) }
 }
