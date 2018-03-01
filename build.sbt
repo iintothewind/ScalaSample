@@ -1,10 +1,6 @@
 import org.ensime.EnsimeCoursierKeys._
 import org.ensime.EnsimeKeys._
 
-name := "ScalaSample"
-version := "1.0"
-scalaVersion := "2.12.4"
-
 lazy val scalaSample = (project in file(".")).
   settings(
     name := "ScalaSample",
