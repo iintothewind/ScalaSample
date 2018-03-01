@@ -10,9 +10,9 @@ lazy val scalaSample = (project in file(".")).
       "-deprecation",
       "-feature",
       "-encoding", "UTF-8"
-//      "-unchecked",
-//      "-Xlint",
-//      "-Ywarn-dead-code"
+      //      "-unchecked",
+      //      "-Xlint",
+      //      "-Ywarn-dead-code"
     )
   )
 
@@ -26,13 +26,15 @@ shellPrompt := { s => Project.extract(s).currentProject.id + "> " }
 ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/groups/public"
 ensimeIgnoreScalaMismatch in ThisBuild := true
 ensimeJavaFlags in ThisBuild := Seq("-Xss512M", "-Xmx4G", "-XX:MaxMetaspaceSize=768M")
-resolvers ++= {
-  Seq(Resolver.sonatypeRepo("releases"))
-}
+resolvers ++= Seq(
+  Resolver.file("mavenLocal", file(s"file://${Path.userHome.getAbsolutePath}/.m2/repository")),
+  Resolver.url("aliyun", url("http://maven.aliyun.com/nexus/content/groups/public"))(Resolver.mavenStylePatterns)
+)
 
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.20",
   "org.scalaz" %% "scalaz-concurrent" % "7.2.20",
+  "com.github.pathikrit" %% "better-files" % "3.4.0",
   "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.6" % Test,
   "com.google.guava" % "guava" % "24.0-jre",

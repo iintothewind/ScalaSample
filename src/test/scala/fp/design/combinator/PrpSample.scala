@@ -2,8 +2,6 @@ package fp.design.combinator
 
 import scala.util.{Failure, Success, Try}
 
-
-
 class PrpSample {
   sealed case class Prp(succNum: Int = 0, run: Try[Boolean]) {
     def check: Either[String, Int] = run match {
