@@ -27,8 +27,8 @@ ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/grou
 ensimeIgnoreScalaMismatch in ThisBuild := true
 ensimeJavaFlags in ThisBuild := Seq("-Xss512M", "-Xmx4G", "-XX:MaxMetaspaceSize=768M")
 resolvers ++= Seq(
-  Resolver.file("mavenLocal", file(s"file://${Path.userHome.getAbsolutePath}/.m2/repository")),
-  Resolver.url("aliyun", url("http://maven.aliyun.com/nexus/content/groups/public"))(Resolver.mavenStylePatterns)
+  Resolver.mavenLocal,
+  MavenRepository("aliyun","http://maven.aliyun.com/nexus/content/groups/public")
 )
 
 libraryDependencies ++= Seq(
