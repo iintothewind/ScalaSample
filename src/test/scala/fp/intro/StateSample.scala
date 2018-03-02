@@ -88,12 +88,18 @@ object Rng {
     case otherwise => otherwise
   }
 
-  def nextInt(bound: Int): Rand[Int] = flatMap(nextNonNegativeInt)(i => i % bound match {
-    case mod if i + (bound - 1) - mod >= 0 => unit(mod)
-    case _ => nextInt(bound)
-  })
+  def nextInt(bound: Int): Rand[Int] = {
+    require(bound > 0, "bound must be non-negative")
+    flatMap(nextNonNegativeInt)(i => i % bound match {
+      case mod if i + (bound - 1) - mod >= 0 => unit(mod)
+      case _ => nextInt(bound)
+    })
+  }
 
-  def nextIntBetween(min: Int, maxExclusive: Int): Rand[Int] = nextInt(maxExclusive - min).map(_ + min)
+  def nextIntBetween(min: Int, maxExclusive: Int): Rand[Int] = {
+    require(maxExclusive > 0 && min > 0 && maxExclusive - min > 0, "both min and max must be non-negative, and max must be greater than min")
+    nextInt(maxExclusive - min).map(_ + min)
+  }
 
   def nextDouble: Rand[Double] = map(nextNonNegativeInt)(_ / Int.MaxValue.toDouble)
 
