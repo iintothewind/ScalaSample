@@ -97,7 +97,7 @@ object Rng {
   }
 
   def nextIntBetween(min: Int, maxExclusive: Int): Rand[Int] = {
-    require(maxExclusive > 0 && min > 0 && maxExclusive - min > 0, "both min and max must be non-negative, and max must be greater than min")
+    require(maxExclusive - min > 0, "maxExclusive must be greater than min")
     nextInt(maxExclusive - min).map(_ + min)
   }
 
@@ -188,6 +188,14 @@ class StateSample {
   @Test
   def testNonNegativeInt(): Unit = {
     assert(Rng(0).nextNonNegativeInt._1 > 0)
+  }
+
+  @Test
+  def testBetween(): Unit = {
+    Rng(0).nextIntBetween(0, 9).ensuring(pair => pair._1 >= 0 && pair._1 < 9)
+    Rng(0).nextIntBetween(0, 1).ensuring(pair => pair._1 >= 0 && pair._1 < 1)
+    Rng(0).nextIntBetween(-9, 0).ensuring(pair => pair._1 >= -9 && pair._1 < 0)
+    Rng(0).nextIntBetween(-9, 9).ensuring(pair => pair._1 >= -9 && pair._1 < 9)
   }
 
   @Test
