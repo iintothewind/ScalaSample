@@ -1,5 +1,6 @@
 import org.ensime.EnsimeCoursierKeys._
 import org.ensime.EnsimeKeys._
+import sbt.util
 
 lazy val scalaSample = (project in file(".")).
   settings(
@@ -22,19 +23,17 @@ shellPrompt := { s => Project.extract(s).currentProject.id + "> " }
 //ivyScala := ivyScala.value map {
 //  _.copy(overrideScalaVersion = true)
 //}
-
 ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/groups/public"
 ensimeIgnoreScalaMismatch in ThisBuild := true
 ensimeJavaFlags in ThisBuild := Seq("-Xss512M", "-Xmx4G", "-XX:MaxMetaspaceSize=768M")
 resolvers ++= Seq(
   Resolver.mavenLocal,
-  MavenRepository("aliyun","http://maven.aliyun.com/nexus/content/groups/public")
+  MavenRepository("aliyun", "http://maven.aliyun.com/nexus/content/groups/public")
 )
 
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.20",
   "org.scalaz" %% "scalaz-concurrent" % "7.2.20",
-  "com.github.pathikrit" %% "better-files" % "3.4.0",
   "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.6" % Test,
   "com.google.guava" % "guava" % "24.0-jre",

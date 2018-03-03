@@ -5,7 +5,7 @@ import org.junit.Test
 
 
 sealed case class Gn[A](state: State[Rng, A]) {
-  def sample(implicit seed: Int = 0): A = state.run(Rng(seed))._1
+  def sample(implicit seed: Rng = Rng(0)): A = state.run(seed)._1
 
   def union(that: Gn[A]): Gn[A] = Gn.randBool.flatMap {
     case true => this
