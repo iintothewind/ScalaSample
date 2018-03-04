@@ -3,14 +3,8 @@ package fp.design
 import java.util.concurrent.{ExecutorService, Executors}
 
 import scala.language.implicitConversions
-import scala.util.Try
 
 package object combinator {
-
-  sealed trait Futre[A] {
-    private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit
-  }
-
   type Async[A] = ExecutorService => Futre[A]
 
   implicit def asyncToPar[A](a: Async[A]): Par[A] = Par(a)

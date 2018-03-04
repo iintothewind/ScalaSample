@@ -19,6 +19,10 @@ sealed case class Par[A](task: Async[A]) {
   def run(timeout: Duration = 9.seconds)(implicit executor: ExecutorService): Try[A] = Par.run(executor, timeout)(task)
 }
 
+sealed trait Futre[A] {
+  private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit
+}
+
 object Par {
   def apply[A](a: => Try[A]): Par[A] = Par(lazyUnit(a))
 
