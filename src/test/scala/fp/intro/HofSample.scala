@@ -4,7 +4,6 @@ import org.junit.Test
 
 import scala.annotation.tailrec
 
-
 object Hof {
   def abs(n: Int): Int = if (n < 0) -n else n
 

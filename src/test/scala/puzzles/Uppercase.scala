@@ -14,24 +14,27 @@ import org.junit.Test
 class Uppercase {
   @Test
   def multipleUppercaseVarsAssign(): Unit = {
-    var MONTH = 12; var DAY = 24
+    var MONTH = 12;
+    var DAY = 24
     //var (HOUR, MINUTE, SECOND) = (12, 0, 0) // Cannot resolve symbol
   }
 
   @Test
   def multipleUppercaseMatchSuccess(): Unit = {
-    val MONTH=12
-    val DAY=24
-    val HOUR = 12; val MINUTE, SECOND = 0 // match constants
+    val MONTH = 12
+    val DAY = 24
+    val HOUR = 12;
+    val MINUTE, SECOND = 0 // match constants
     var (HOUR, MINUTE, SECOND) = (12, 0, 0) // pattern match successful
     println(s"HOUR=$HOUR, MINUTE=$MINUTE, SECOND=$SECOND")
   }
 
   @Test(expected = classOf[MatchError])
   def multipleUppercaseMatchFail(): Unit = {
-    val MONTH=12
-    val DAY=24
-    val HOUR = 12; val MINUTE, SECOND = 0 // match constants
+    val MONTH = 12
+    val DAY = 24
+    val HOUR = 12;
+    val MINUTE, SECOND = 0 // match constants
     var (HOUR, MINUTE, SECOND) = (12, 1, 0) // pattern match error
     println(s"HOUR=$HOUR, MINUTE=$MINUTE, SECOND=$SECOND")
   }

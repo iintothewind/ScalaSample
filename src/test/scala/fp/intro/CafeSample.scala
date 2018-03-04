@@ -3,10 +3,8 @@ package fp.intro
 import org.junit.Test
 
 sealed case class CreditCard(private val balance: Double) {
-  def apply(balance: Double): CreditCard = new CreditCard(balance)
-
   def charge(price: Double): CreditCard = {
-    this (balance - price)
+    CreditCard(balance - price)
   }
 }
 

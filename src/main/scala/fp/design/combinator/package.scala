@@ -2,8 +2,6 @@ package fp.design
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-import fp.intro.Rng
-
 import scala.language.implicitConversions
 
 package object combinator {
