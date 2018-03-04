@@ -26,19 +26,20 @@ sealed trait Futre[A] {
 object Par {
   def apply[A](a: => Try[A]): Par[A] = Par(lazyUnit(a))
 
+  def fork[A](a: => Async[A]): Async[A] = es => new Futre[A] {
+    override private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit = eval(es)(a(es)(p))
+  }
+
   def unit[A](t: Try[A]): Async[A] = es => new Futre[A] {
     override private[combinator] def apply(pf: PartialFunction[Try[A], Unit]): Unit = pf(t)
   }
+
+  def lazyUnit[A](t: => Try[A]): Async[A] = fork(unit(t))
 
   def eval(es: ExecutorService)(callback: => Unit): Unit = es.submit(new Runnable {
     override def run(): Unit = callback
   })
 
-  def fork[A](a: => Async[A]): Async[A] = es => new Futre[A] {
-    override private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit = eval(es)(a(es)(p))
-  }
-
-  def lazyUnit[A](t: => Try[A]): Async[A] = fork(unit(t))
 
   def async[A, B](f: A => Try[B]): A => Async[B] = a => lazyUnit(f(a))
 

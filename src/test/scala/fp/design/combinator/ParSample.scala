@@ -13,7 +13,7 @@ class ParSample {
 
   @Test
   def testAsyncWithoutRecovery(): Unit = {
-    Par.lazyUnit(Try("a".toInt)).run().isFailure
+    Par.lazyUnit(Try("a".toInt)).run().ensuring(_.isFailure)
   }
 
   @Test
@@ -40,7 +40,7 @@ class ParSample {
 
   @Test
   def testParMapWithoutRecovery(): Unit = {
-    Par.parMap(List("b", "a", "2", "3", "4", "5"))(i => Try(i.toInt)).run().isFailure
+    Par.parMap(List("b", "a", "2", "3", "4", "5"))(i => Try(i.toInt)).run().ensuring(_.isFailure)
   }
 
   @Test
