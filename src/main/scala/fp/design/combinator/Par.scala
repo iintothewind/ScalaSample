@@ -1,15 +1,11 @@
 package fp.design.combinator
 
-import java.util.concurrent.{ExecutorService, TimeUnit, _}
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.{ExecutorService, TimeUnit, _}
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz.concurrent.Actor
-
-sealed trait Futre[A] {
-  private[combinator] def apply(p: PartialFunction[Try[A], Unit]): Unit
-}
 
 sealed case class Par[A](task: Async[A]) {
   def mapWith[B, C](that: Par[B])(f: (A, B) => Try[C]): Par[C] = Par(Par.map2(this.task, that.task)(f))

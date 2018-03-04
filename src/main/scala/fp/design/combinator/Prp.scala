@@ -3,14 +3,6 @@ package fp.design.combinator
 import fp.intro.Rng
 import scala.util.{Failure, Success, Try}
 
-sealed trait Result
-
-sealed case class Pass() extends Result
-
-sealed case class Fail[A](a: A) extends Result
-
-sealed case class Exception[A](a: A, e: Throwable) extends Result
-
 sealed case class Prp(run: (Int, Rng) => Result) {
   def map(f: Result => Result): Prp = Prp((i, rng) => f(run(i, rng)))
 
