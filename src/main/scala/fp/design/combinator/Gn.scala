@@ -16,7 +16,7 @@ sealed case class Gn[A](state: State[Rng, A]) {
 
   def many(size: Gn[Int]): Gn[Seq[A]] = size.flatMap(n => Gn(State.many(Seq.fill(n)(this.state): _*)))
 
-  def zip[B](that: Gn[B]): Gn[(A, B)] = this.flatMap(a => that.map((a, _)))
+  def zip[B](b: Gn[B]): Gn[(A, B)] = this.flatMap(a => b.map((a, _)))
 
   def zip2[B, C](b: Gn[B], c: Gn[C]): Gn[(A, B, C)] = this.zip(b).flatMap(ab => c.map((ab._1, ab._2, _)))
 }
