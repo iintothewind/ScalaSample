@@ -171,7 +171,7 @@ sealed trait Strim[+A] {
     case _ => None
   }
 
-  def zip[B](that: Strim[B]) = zipWith(that)((_, _))
+  def zip[B](that: Strim[B]): Strim[(A, B)] = zipWith(that)((_, _))
 
   def startsWith[U >: A](that: Strim[U]): Boolean = this.zip(that).length == that.length
 
