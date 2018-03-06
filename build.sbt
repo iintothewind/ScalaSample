@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.20",
   "org.scalaz" %% "scalaz-concurrent" % "7.2.20",
   "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.6" % Test,
+  "org.scala-lang.modules" %% "scala-xml" % "1.1.0" % Test,
   "com.google.guava" % "guava" % "24.0-jre",
   "junit" % "junit" % "4.12" % Test,
   "com.novocode" % "junit-interface" % "0.11" % Test,
