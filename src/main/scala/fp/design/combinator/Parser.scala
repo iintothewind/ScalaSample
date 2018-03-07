@@ -5,10 +5,16 @@ import scala.language.{higherKinds, implicitConversions}
 
 sealed case class ParseError()
 
-sealed trait SimpleParser[+A]
+sealed case class SimpleParser[+A](a: A)
 
-sealed trait SimpleParsers[ParseError, SimpleParser[+ _]] {
-  self =>
+sealed trait SimpleParsers[ParseError, SimpleParser[+ _]] { self =>
+
+  case class SimpleParserOps[A](p: SimpleParser[A]) {
+    def ||[B >: A](p2: SimpleParser[B]): SimpleParser[B] = self.or(p, p2)
+
+    def or[B >: A](p2: => SimpleParser[B]): SimpleParser[B] = self.or(p, p2)
+  }
+
   implicit def string(s: String): SimpleParser[String]
 
   implicit def operators[A](p: SimpleParser[A]): SimpleParserOps[A] = SimpleParserOps[A](p)
@@ -21,10 +27,6 @@ sealed trait SimpleParsers[ParseError, SimpleParser[+ _]] {
 
   def run[A](p: SimpleParser[A])(input: String): Either[ParseError, A]
 
-  case class SimpleParserOps[A](p: SimpleParser[A]) {
-    def ||[B >: A](p2: SimpleParser[B]): SimpleParser[B] = self.or(p, p2)
-
-    def or[B >: A](p2: => SimpleParser[B]): SimpleParser[B] = self.or(p, p2)
-  }
+  def repeat[A](n: Int, p: SimpleParser[A]): SimpleParser[A]
 
 }
