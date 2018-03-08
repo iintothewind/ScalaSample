@@ -19,7 +19,7 @@ package object stateful {
       h = x
     }
 
-    def minute = m
+    def minute: Int = m
 
     def minute_=(x: Int): Unit = {
       require(0 <= x && x < 60)
@@ -32,13 +32,13 @@ package object stateful {
     //an initializer = _ of a field assigns a zero value to that field
     var celsius: Float = _
 
-    def fahrenheit = celsius * 9 / 5 + 32
+    def fahrenheit: Float = celsius * 9 / 5 + 32
 
     def fahrenheit_=(f: Float) {
       celsius = (f - 32) * 5 / 9
     }
 
-    override def toString = fahrenheit + " F/" + celsius + " C"
+    override def toString: String = fahrenheit + " F/" + celsius + " C"
   }
 
 }

@@ -84,11 +84,11 @@ class QuickTour {
 
     def hour: Int = h
 
-    def hour_=(x: Int) = h = x
+    def hour_=(x: Int): Unit = h = x
 
     def minute: Int = m
 
-    def minute_=(x: Int) = m = x
+    def minute_=(x: Int): Unit = m = x
 
     override def toString: String = h + ":" + m
   }
@@ -109,10 +109,10 @@ class QuickTour {
     private def gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
 
     private val g = gcd(numerArg, denomArg)
-    val numerator = numerArg / g
-    val denominator = denomArg / g
+    val numerator: Int = numerArg / g
+    val denominator: Int = denomArg / g
 
-    override def toString = numerator + "/" + denominator
+    override def toString: String = numerator + "/" + denominator
   }
 
   @Test(expected = classOf[IllegalArgumentException])
@@ -182,10 +182,10 @@ class QuickTour {
       require(denomArg != 0)
       gcd(numerArg, denomArg)
     }
-    lazy val numerator = numerArg / g
-    lazy val denominator = denomArg / g
+    lazy val numerator: Int = numerArg / g
+    lazy val denominator: Int = denomArg / g
 
-    override def toString = numerator + "/" + denominator
+    override def toString: String = numerator + "/" + denominator
   }
 
   @Test

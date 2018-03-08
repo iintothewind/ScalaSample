@@ -53,13 +53,13 @@ class Rational(n: Int, d: Int) extends Ordered[Rational] {
     if (this.lessThan(that)) that else this
   }
 
-  override def toString = this.numerator + "/" + this.denominator
+  override def toString: String = this.numerator + "/" + this.denominator
 
   override def hashCode: Int = {
     Objects.hash(this.numerator.asInstanceOf[Integer], this.denominator.asInstanceOf[Integer])
   }
 
-  override def equals(any: Any) = any match {
+  override def equals(any: Any): Boolean = any match {
     case that: Rational => this.numerator == that.numerator && this.denominator == that.denominator
     case _ => false
   }

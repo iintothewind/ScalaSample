@@ -7,7 +7,7 @@ class TypeParameterization {
   class NonvariantCell[T](init: T) {
     private[this] var current = init
 
-    def cur = current
+    def cur: T = current
 
     def cur_=(c: T): Unit = current = c
   }

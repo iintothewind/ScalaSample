@@ -142,7 +142,7 @@ package object generics {
 
   class Person(val firstName: String, val lastName: String)
     extends Ordered[Person] {
-    def compare(that: Person) = {
+    def compare(that: Person): Int = {
       val lastNameComparison =
         lastName.compareToIgnoreCase(that.lastName)
       if (lastNameComparison != 0)
@@ -151,7 +151,7 @@ package object generics {
         firstName.compareToIgnoreCase(that.firstName)
     }
 
-    override def toString = firstName + " " + lastName
+    override def toString: String = firstName + " " + lastName
   }
 
   object Person {

@@ -24,7 +24,7 @@ package object modular {
   }
 
   class Recipe(val name: String, val ingredients: List[Food], val instructions: String) {
-    override def toString = name
+    override def toString: String = name
   }
 
   trait SimpleRecipes {
@@ -57,9 +57,9 @@ package object modular {
   abstract class Browser {
     val database: Database
 
-    def recipeUsing(food: String) = database.allRecipes.filter(_.ingredients.contains(database.foodNamed(food).getOrElse(NonFood)))
+    def recipeUsing(food: String): List[Recipe] = database.allRecipes.filter(_.ingredients.contains(database.foodNamed(food).getOrElse(NonFood)))
 
-    def recipeUsing(food: Food) = database.allRecipes.filter(_.ingredients.contains(food))
+    def recipeUsing(food: Food): List[Recipe] = database.allRecipes.filter(_.ingredients.contains(food))
 
     def displayCategory(category: database.FoodCategory): Unit = println(category)
   }

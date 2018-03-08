@@ -98,7 +98,7 @@ class ControlAbstraction {
   @Test(expected = classOf[ArithmeticException])
   def byNameParameters(): Unit = {
     var assertionEnabled = true
-    def myAssert(predicate: () => Boolean) = if (assertionEnabled && !predicate()) throw new AssertionError
+    def myAssert(predicate: () => Boolean): Unit = if (assertionEnabled && !predicate()) throw new AssertionError
     myAssert(() => 5 > 3)
     //myAssert(5>3) // wont work, because of missing ()=>
 
@@ -107,11 +107,11 @@ class ControlAbstraction {
     // because is a Boolean, the expression inside the parentheses in boolAssert(5/0) is evaluated
     // before
     // the call to boolAssert, thus pops up the java.lang.ArithmeticException: / by zero
-    def boolAssert(predicate: Boolean) = if (assertionEnabled && !predicate) throw new AssertionError
+    def boolAssert(predicate: Boolean): Unit = if (assertionEnabled && !predicate) throw new AssertionError
     boolAssert(5 / 0 == 0) // assertionEnabled = false, but exception still pops up
 
     assertionEnabled = true
-    def byNameAssert(predicate: => Boolean) = if (assertionEnabled && !predicate) throw new AssertionError
+    def byNameAssert(predicate: => Boolean): Unit = if (assertionEnabled && !predicate) throw new AssertionError
     byNameAssert(5 > 3)
   }
 
