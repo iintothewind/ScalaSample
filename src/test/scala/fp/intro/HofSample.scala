@@ -1,15 +1,16 @@
 package fp.intro
 
 import org.junit.Test
-
+import scala.math.abs
 import scala.annotation.tailrec
 
 object Hof {
-  def abs(n: Int): Int = if (n < 0) -n else n
+  def absolute(n: Int): Int = if (n < 0) -n else n
 
   def factorial(n: Int): Int = {
     @tailrec
     def go(n: Int, acc: Int): Int = if (n <= 0) acc else go(n - 1, n * acc)
+
     go(n, 1)
   }
 
@@ -20,6 +21,7 @@ object Hof {
       case 0 => a
       case _ => fibTail(n - 1, b, a + b)
     }
+
     fibTail(n, 0, 1)
   }
 
@@ -30,6 +32,7 @@ object Hof {
       if (n >= as.length) -1
       else if (p(as(n))) n
       else find(n + 1)
+
     find(0)
   }
 
@@ -48,11 +51,19 @@ object Hof {
 
   private def formatAbs(x: Int): String = {
     val msg = "The absolute value of %d is %d"
-    msg.format(x, abs(x))
+    msg.format(x, absolute(x))
   }
 
   def formatResult[A](input: A, f: A => A): String = {
     s"The result of f($input) is ${f(input)}"
+  }
+
+  def sqr(d: Double): Double = {
+    def imprv(x: Double): Double = (x + d / x) / 2
+
+    def guess(g: Double): Double = if (abs((g * g) - d) < 0.00000001D) g else guess(imprv(g))
+
+    if (d < 0) Double.NaN else guess(1)
   }
 }
 
@@ -78,5 +89,10 @@ class HofSample {
   @Test
   def testIsSorted(): Unit = {
     assert(Hof.isSorted(Seq(1, 2, 3, 4, 5))(_ < _))
+  }
+
+  @Test
+  def testSqr(): Unit = {
+    println(Hof.sqr(-2))
   }
 }
