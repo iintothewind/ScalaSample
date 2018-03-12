@@ -7,7 +7,7 @@ import scala.util.Try
 class ParSample {
   @Test
   def testAsync(): Unit = {
-    val ps = List("a", "b", "c").map(Par.async(i => Try(i.toInt).recover { case _ => 0 }))
+    val ps: Seq[Async[Int]] = List("a", "b", "c").map(Par.async(i => Try(i.toInt).recover { case _ => 0 }))
     ps.map(_.run()).foreach(_.ensuring(_.isSuccess))
   }
 
@@ -18,7 +18,7 @@ class ParSample {
 
   @Test
   def testMap2(): Unit = {
-    val mp2 = Par.map2(Par.lazyUnit(Try("a".toInt).recover { case _ => 0 }), Par.lazyUnit(Try("b".toInt).recover { case _ => 0 }))((l, r) => Try(l + r))
+    val mp2: Async[Int] = Par.map2(Par.lazyUnit(Try("a".toInt).recover { case _ => 0 }), Par.lazyUnit(Try("b".toInt).recover { case _ => 0 }))((l, r) => Try(l + r))
     mp2.run().foreach(_.ensuring(_ == 0))
   }
 
@@ -29,7 +29,7 @@ class ParSample {
 
   @Test
   def testSortPar(): Unit = {
-    val lst = List(9, -2, 3, -6, 5, 2, 1)
+    val lst: List[Int] = List(9, -2, 3, -6, 5, 2, 1)
     Par.sortPar(Par.lazyUnit(Try(lst))).run().foreach(_.ensuring(_ == lst.sorted))
   }
 
