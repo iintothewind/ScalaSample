@@ -19,4 +19,5 @@ package object combinator {
 
   sealed case class Exception[A](a: A, e: Throwable) extends Result
 
+  type Parser[+A] = ParserState => ParseResult[A]
 }
