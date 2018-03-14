@@ -3,10 +3,10 @@ package fp.design.combinator
 import fp.intro.Rng
 import scala.util.{Failure, Success, Try}
 
-sealed case class Prp(run: (Int, Rng) => ParseResult) {
-  def map(f: ParseResult => ParseResult): Prp = Prp((i, rng) => f(run(i, rng)))
+sealed case class Prp(run: (Int, Rng) => Result) {
+  def map(f: Result => Result): Prp = Prp((i, rng) => f(run(i, rng)))
 
-  def flatMap(f: ParseResult => Prp): Prp = Prp((i, rng) => f(run(i, rng)).run(i, rng))
+  def flatMap(f: Result => Prp): Prp = Prp((i, rng) => f(run(i, rng)).run(i, rng))
 
   def &&(that: Prp): Prp = Prp { (size: Int, rng: Rng) =>
     run(size, rng) match {

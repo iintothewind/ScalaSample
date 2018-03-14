@@ -14,36 +14,36 @@ sealed case class ParserState(location: Location) {
 
 sealed trait ParseResult[+A] {
   def extract: Either[ParseError, A] = this match {
-    case Failure(e, _) => Left(e)
+    case ParseFailure(e, _) => Left(e)
 
-    case Success(a, _) => Right(a)
+    case ParseSuccess(a, _) => Right(a)
   }
 
   def uncommit: ParseResult[A] = this match {
-    case Failure(e, true) => Failure(e, isCommitted = false)
+    case ParseFailure(e, true) => ParseFailure(e, isCommitted = false)
     case _ => this
   }
 
   def addCommit(isCommitted: Boolean): ParseResult[A] = this match {
-    case Failure(e, c) => Failure(e, c || isCommitted)
+    case ParseFailure(e, c) => ParseFailure(e, c || isCommitted)
     case _ => this
   }
 
   def mapError(f: ParseError => ParseError): ParseResult[A] = this match {
-    case Failure(e, c) => Failure(f(e), c)
+    case ParseFailure(e, c) => ParseFailure(f(e), c)
     case _ => this
   }
 
   def advanceSuccess(n: Int): ParseResult[A] = this match {
-    case Success(a, m) => Success(a, n + m)
+    case ParseSuccess(a, m) => ParseSuccess(a, n + m)
     case _ => this
   }
 
 }
 
-sealed case class Success[+T](get: T, length: Int) extends ParseResult[T]
+sealed case class ParseSuccess[+T](get: T, length: Int) extends ParseResult[T]
 
-sealed case class Failure(get: ParseError, isCommitted: Boolean) extends ParseResult[Nothing]
+sealed case class ParseFailure(get: ParseError, isCommitted: Boolean) extends ParseResult[Nothing]
 
 object SimpleParser extends Parsers[Parser] {
   def firstNonmatchingIndex(s1: String, s2: String, offset: Int): Int = {
@@ -66,8 +66,8 @@ object SimpleParser extends Parsers[Parser] {
     val msg = s"'$s'"
     state => {
       firstNonmatchingIndex(state.location.input, s, state.location.offset) match {
-        case -1 => Success(s, s.length)
-        case i@_ => Failure(state.location.advanceBy(i).toError(msg), i != 0)
+        case -1 => ParseSuccess(s, s.length)
+        case i@_ => ParseFailure(state.location.advanceBy(i).toError(msg), i != 0)
       }
     }
   }
@@ -75,24 +75,24 @@ object SimpleParser extends Parsers[Parser] {
   override def or[A](l: Parser[A], r: => Parser[A]): Parser[A] = {
     state =>
       l(state) match {
-        case Failure(_, false) => r(state)
+        case ParseFailure(_, false) => r(state)
         case otherwise => otherwise
       }
   }
 
   override def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B] = {
     state =>
-      f(state) match {
-        case Success(a, n) => f(a)(state.advanceBy(n)).addCommit(n != 0).advanceSuccess(n)
-        case failure@Failure(_, _) => failure
+      p(state) match {
+        case ParseSuccess(a, n) => f(a)(state.advanceBy(n)).addCommit(n != 0).advanceSuccess(n)
+        case failure@ParseFailure(_, _) => failure
       }
   }
 
   override def slice[A](p: Parser[A]): Parser[String] = {
     state =>
       p(state) match {
-        case Success(_, n) => Success(state.slice(n), n)
-        case failure@Failure(_, _) => failure
+        case ParseSuccess(_, n) => ParseSuccess(state.slice(n), n)
+        case failure@ParseFailure(_, _) => failure
       }
   }
 
@@ -102,9 +102,9 @@ object SimpleParser extends Parsers[Parser] {
 
       def go(p: Parser[A], offset: Int): ParseResult[List[A]] = {
         p(state.advanceBy(offset)) match {
-          case Success(a, n) => buf += a; go(p, offset + n)
-          case failure@Failure(e, true) => failure
-          case Failure(e, _) => Success(buf.toList, offset)
+          case ParseSuccess(a, n) => buf += a; go(p, offset + n)
+          case failure@ParseFailure(e, true) => failure
+          case ParseFailure(e, _) => ParseSuccess(buf.toList, offset)
         }
       }
 

@@ -1,6 +1,7 @@
 package fp.intro
 
 import scala.collection.mutable
+import scala.language.{higherKinds, implicitConversions}
 import scala.reflect.ClassTag
 
 /**
