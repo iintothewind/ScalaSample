@@ -72,6 +72,8 @@ object SimpleParser extends Parsers[Parser] {
     }
   }
 
+  override def succeed[A](a: A): Parser[A] = _ => ParseSuccess(a, 0)
+
   override def or[A](l: Parser[A], r: => Parser[A]): Parser[A] = {
     state =>
       l(state) match {

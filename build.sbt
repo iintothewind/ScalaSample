@@ -1,7 +1,3 @@
-import org.ensime.EnsimeCoursierKeys._
-import org.ensime.EnsimeKeys._
-import sbt.util
-
 lazy val scalaSample = (project in file(".")).
   settings(
     name := "ScalaSample",
@@ -11,9 +7,9 @@ lazy val scalaSample = (project in file(".")).
       "-deprecation",
       "-feature",
       "-encoding", "UTF-8"
-      //      "-unchecked",
-      //      "-Xlint",
-      //      "-Ywarn-dead-code"
+      //"-unchecked",
+      //"-Xlint",
+      //"-Ywarn-dead-code"
     )
   )
 
@@ -32,9 +28,23 @@ resolvers ++= Seq(
   MavenRepository("aliyun", "http://maven.aliyun.com/nexus/content/groups/public")
 )
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs@_*) => MergeStrategy.discard
+  case _ => MergeStrategy.first
+}
+
+lazy val log4jVersion = "2.11.0"
+lazy val scalazVersion = "7.2.20"
+lazy val latest = "latest.integration"
+
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.20",
-  "org.scalaz" %% "scalaz-concurrent" % "7.2.20",
+  "org.apache.logging.log4j" % "log4j-api" % log4jVersion,
+  "org.apache.logging.log4j" % "log4j-jcl" % log4jVersion,
+  "org.apache.logging.log4j" % "log4j-core" % log4jVersion,
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % log4jVersion,
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0",
+  "org.scalaz" %% "scalaz-core" % scalazVersion,
+  "org.scalaz" %% "scalaz-concurrent" % scalazVersion,
   "com.google.guava" % "guava" % "24.0-jre",
   "org.scala-lang.modules" %% "scala-xml" % "1.1.0" % Test,
   "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
