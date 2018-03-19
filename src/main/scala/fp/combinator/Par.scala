@@ -1,11 +1,12 @@
-package fp.design.combinator
+package fp.combinator
 
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{ExecutorService, TimeUnit, _}
 
+import scalaz.concurrent.Actor
+
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
-import scalaz.concurrent.Actor
 
 sealed case class Par[A](task: Async[A]) {
   def mapWith[B, C](that: Par[B])(f: (A, B) => Try[C]): Par[C] = Par(Par.map2(this.task, that.task)(f))

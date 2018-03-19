@@ -1,6 +1,6 @@
-package fp.design.combinator
+package fp.combinator
 
-import fp.design.combinator.SimpleParser._
+import fp.combinator.SimpleParser._
 import org.junit
 
 @junit.Ignore

@@ -1,6 +1,7 @@
-package fp.design.combinator
+package fp.combinator
 
 import fp.intro.Rng
+
 import scala.util.{Failure, Success, Try}
 
 sealed case class Prp(run: (Int, Rng) => Result) {

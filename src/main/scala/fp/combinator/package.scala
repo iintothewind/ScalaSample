@@ -1,4 +1,4 @@
-package fp.design
+package fp
 
 import java.util.concurrent.{ExecutorService, Executors}
 

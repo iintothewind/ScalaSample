@@ -1,4 +1,4 @@
-package fp.design.combinator
+package fp.combinator
 
 import scala.util.Either
 import scala.language.{higherKinds, implicitConversions}

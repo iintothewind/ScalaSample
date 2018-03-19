@@ -1,4 +1,4 @@
-package fp.design.combinator
+package fp.combinator
 
 import fp.intro.{Rng, State}
 

@@ -1,4 +1,4 @@
-package fp.design.combinator
+package fp.combinator
 
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions

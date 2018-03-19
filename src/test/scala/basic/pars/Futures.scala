@@ -1,4 +1,4 @@
-package basic.pars.basic
+package basic.pars
 
 import java.util.concurrent.TimeUnit
 
