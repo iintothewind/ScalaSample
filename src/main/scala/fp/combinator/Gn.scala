@@ -44,7 +44,11 @@ object Gn {
 
   def oneOf[A](source: Gn[IndexedSeq[A]]): Gn[A] = source.flatMap(xs => Gn.between(0, xs.size).map(xs(_)))
 
+  def oneOfIn[A](source: A*): Gn[A] = oneOf(const(IndexedSeq(source: _*)))
+
   def randSeq[A](source: Gn[IndexedSeq[A]])(implicit len: Gn[Int] = source.map(_.length)): Gn[Seq[A]] = oneOf(source).many(len)
+
+  def randSeqIn[A](source: A*)(implicit len: Int = source.length): Gn[Seq[A]] = randSeq(const(IndexedSeq(source: _*)))
 
   def randStr(source: String, size: Gn[Int])(implicit len: Gn[Int] = const(source.length)): Gn[Seq[String]] = randSeq(Gn.const(source: IndexedSeq[Char]))(len).map(xs => String.valueOf(xs.toArray)).many(size)
 

@@ -1,7 +1,6 @@
 package fp.pattern
 
 import org.junit
-import org.junit.Ignore
 import org.scalacheck.Prop._
 import org.scalacheck.{Gen, Prop}
 
@@ -63,17 +62,27 @@ class MonoidSample {
     override def zero: Option[A] = None
   }
 
-  def endoAndThen[A]: Monoid[A => A] = new Monoid[A => A] {
+  def endoCompose[A]: Monoid[A => A] = new Monoid[A => A] {
     override def zero: A => A = identity
 
     override def op(a1: A => A, a2: A => A): A => A = a1.compose(a2)
   }
 
-  def monoidProp[A](gen: Gen[A], monoid: Monoid[A]): Prop = {
-    val p1 = forAll(gen)(a => a == monoid.op(a, monoid.zero) && monoid.op(a, monoid.zero) == monoid.op(monoid.zero, a))
-    val p2 = forAll(gen, gen, gen)((x, y, z) => monoid.op(x, monoid.op(y, z)) == monoid.op(monoid.op(x, y), z))
+  def endoAndThen[A]: Monoid[A => A] = new Monoid[A => A] {
+    override def zero: A => A = identity
+
+    override def op(a1: A => A, a2: A => A): A => A = a1.andThen(a2)
+  }
+
+  def monoidProp[A](gen: Gen[A], m: Monoid[A]): Prop = {
+    val p1 = forAll(gen)(a => a == m.op(a, m.zero) && a == m.op(m.zero, a) && m.op(a, m.zero) == m.op(m.zero, a))
+    val p2 = forAll(gen, gen, gen)((x, y, z) => m.op(x, m.op(y, z)) == m.op(m.op(x, y), z))
     p1 && p2
   }
+
+  def concat[A](as: Seq[A], monoid: Monoid[A]): A = as.foldLeft(monoid.zero)(monoid.op)
+
+  def foldMap[A, B](as: Seq[A], monoid: Monoid[B])(f: A => B): B = concat(as.map(f), monoid)
 
   @junit.Test
   def testMonoid(): Unit = {
@@ -86,9 +95,31 @@ class MonoidSample {
     monoidProp(Gen.oneOf(None, Some(1), Some(2), Some(3)), optOrElse[Int]).check
   }
 
-  @Ignore
+  @junit.Test
+  def testEndoCompose(): Unit = {
+    val gen: Gen[Int => Int] = Gen.oneOf[Int => Int]((i: Int) => i * 2, (i: Int) => i * 3, (i: Int) => i * 4, (i: Int) => i * 5)
+    val p1 = forAll(gen, Gen.choose(0, 9))((a, i) => a(i) == endoCompose.op(a, endoCompose.zero)(i))
+    val p2 = forAll(gen, Gen.choose(0, 9))((a, i) => endoCompose.op(a, endoCompose.zero)(i) == endoCompose.op(endoCompose.zero, a)(i))
+    val p3 = forAll(gen, gen, gen, Gen.choose(0, 9))((x, y, z, i) => endoCompose.op(x, endoCompose.op(y, z))(i) == endoCompose.op(endoCompose.op(x,
+      y), z)(i))
+    (p1 && p2 && p3).check
+  }
+
   @junit.Test
   def testEndoAndThen(): Unit = {
-    monoidProp(Gen.oneOf[Int => Int]((i: Int) => i * 2, (i: Int) => i * 3, (i: Int) => i * 4, (i: Int) => i * 5), endoAndThen[Int]).check
+    val gen: Gen[Int => Int] = Gen.oneOf[Int => Int]((i: Int) => i * 2, (i: Int) => i * 3, (i: Int) => i * 4, (i: Int) => i * 5)
+    val p1 = forAll(gen, Gen.choose(0, 9))((a, i) => a(i) == endoAndThen.op(a, endoAndThen.zero)(i))
+    val p2 = forAll(gen, Gen.choose(0, 9))((a, i) => endoAndThen.op(a, endoAndThen.zero)(i) == endoAndThen.op(endoAndThen.zero, a)(i))
+    val p3 = forAll(gen, gen, gen, Gen.choose(0, 9))((x, y, z, i) => endoAndThen.op(x, endoAndThen.op(y, z))(i) == endoAndThen.op(endoAndThen.op(x,
+      y), z)(i))
+    (p1 && p2 && p3).check
   }
+
+  @junit.Test
+  def testStringMonoid(): Unit = {
+    val words: List[String] = List("Hic", "Est", "Index")
+    assert(words.foldLeft(stringMonoid.zero)(stringMonoid.op) == words.foldRight(stringMonoid.zero)(stringMonoid.op))
+    assert(words.foldLeft("")(_ + _) == words.foldRight("")(_ + _))
+  }
+
 }

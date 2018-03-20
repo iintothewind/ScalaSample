@@ -26,6 +26,7 @@ class GenSample {
   @Test
   def testOneOf(): Unit = {
     "abcde".ensuring(it => it.contains(Gn.oneOf(Gn.const(it: IndexedSeq[Char])).sample))
+    Seq(1, 2, 3, 4, 5).ensuring(it => it.contains(Gn.oneOfIn(it: _*).sample))
   }
 
   @Test
