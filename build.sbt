@@ -2,7 +2,7 @@ lazy val scalaSample = (project in file(".")).
   settings(
     name := "ScalaSample",
     version := "1.0",
-    scalaVersion := "2.12.4",
+    scalaVersion := "2.12.5",
     scalacOptions ++= Seq(
       "-deprecation",
       "-feature",
