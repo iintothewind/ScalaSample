@@ -175,6 +175,7 @@ class ListSample {
         loop(if (sub.sum > mxsq.sum) sub else mxsq, if (sub.sum > 0) sub else Nil, rs)
       case Nil => mxsq
     }
+
     loop(List.empty[Int], List.empty[Int], xs).reverse
   }
 
@@ -187,4 +188,24 @@ class ListSample {
     val l3 = maxSubList(List(-2, 1, -3))
     println(s"l1=$l3, l1.sum=${l3.sum}")
   }
+
+  def twoSum(seq: Seq[Int], target: Int): Option[(Int, Int)] = {
+    def loop(xs: Seq[(Int, Int)], target: Int, map: Map[Int, Int]): Option[(Int, Int)] = {
+      xs match {
+        case Nil => None
+        case x +: _ if x._1 < target && map.get(target - x._1).isDefined => Some((x._2, map(target - x._1)))
+        case x +: rs => loop(rs, target, map.+((x._1, x._2)))
+      }
+    }
+
+    loop(seq.zipWithIndex, target, Map.empty)
+  }
+
+  @Test
+  def testTwoSum(): Unit = {
+    val target = 8
+    val seq = Seq(1, 2, 3, 5, 4, 4)
+    twoSum(seq, target).ensuring(opt => opt.exists(pair => seq(pair._1) + seq(pair._2) == target))
+  }
+
 }
