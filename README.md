@@ -1,6 +1,6 @@
 # ScalaSample
 My scala sample code while learning
-- Progamming In Scala
+- Programming In Scala
 - Scala In Depth
 - Functional Programming In Scala
 - Learning Concurrent Programming In Scala
@@ -12,10 +12,19 @@ My scala sample code while learning
 
 ### fp.intro for Functional Data Structures
  
-- Lst : List Implementation
-- Strim : Stream Implementation
-- Tree: Tree Implementaion
+- Lst :  List 
+- Strim : Stream 
+- Tree: Tree 
+- Opt: Option
+- Ether: Either
+- State: Functional State
+- Rng: Random depends on State
 
+### fp.combinator for Combinator
 
+- Par : Concurrent Calculation
+- Gn : Similar as Gen in ScalaCheck
+- Prp : Similar as Prop in ScalaCheck
+- Parser: Simple Parser
 
 
