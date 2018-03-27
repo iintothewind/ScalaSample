@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/iintothewind/ScalaSample.svg?branch=master)](https://travis-ci.org/iintothewind/ScalaSample)
+
 # ScalaSample
 My scala sample code while learning
 - Programming In Scala
