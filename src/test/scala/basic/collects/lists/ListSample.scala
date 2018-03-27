@@ -189,7 +189,8 @@ class ListSample {
     println(s"l1=$l3, l1.sum=${l3.sum}")
   }
 
-  def twoSum(seq: Seq[Int], target: Int): Option[(Int, Int)] = {
+  def twoSumByMap(seq: Seq[Int], target: Int): Option[(Int, Int)] = {
+    @tailrec
     def loop(xs: Seq[(Int, Int)], target: Int, map: Map[Int, Int]): Option[(Int, Int)] = {
       xs match {
         case Nil => None
@@ -201,11 +202,26 @@ class ListSample {
     loop(seq.zipWithIndex, target, Map.empty)
   }
 
+  def twoSumBySort(seq: Seq[Int], target: Int): Option[(Int, Int)] = {
+    @tailrec
+    def loop(xs: Seq[(Int, Int)], target: Int, l: Int, r: Int): Option[(Int, Int)] = {
+      (l, r) match {
+        case (a, b) if a < b && xs(a)._1 + xs(b)._1 == target => Some((xs(a)._2, xs(b)._2))
+        case (a, b) if a < b && xs(a)._1 + xs(b)._1 < target => loop(xs, target, a + 1, b)
+        case (a, b) if a < b && xs(a)._1 + xs(b)._1 > target => loop(xs, target, a, b - 1)
+        case _ => None
+      }
+    }
+
+    loop(seq.zipWithIndex.sortBy(_._1), target, 0, seq.size - 1)
+  }
+
   @Test
   def testTwoSum(): Unit = {
     val target = 8
     val seq = Seq(1, 2, 3, 5, 4, 4)
-    twoSum(seq, target).ensuring(opt => opt.exists(pair => seq(pair._1) + seq(pair._2) == target))
+    twoSumByMap(seq, target).ensuring(opt => opt.exists(pair => seq(pair._1) + seq(pair._2) == target))
+    twoSumBySort(seq, target).ensuring(opt => opt.exists(pair => seq(pair._1) + seq(pair._2) == target))
   }
 
 }
