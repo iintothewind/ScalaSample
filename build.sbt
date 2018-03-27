@@ -19,19 +19,19 @@ shellPrompt := { s => Project.extract(s).currentProject.id + "> " }
 //ivyScala := ivyScala.value map {
 //  _.copy(overrideScalaVersion = true)
 //}
-scalafmtConfig in ThisBuild := file(s"file://${Path.userHome.getAbsolutePath}/.sbt/1.0/.scalafmt.conf")
-ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/groups/public"
-ensimeIgnoreScalaMismatch in ThisBuild := true
-ensimeJavaFlags in ThisBuild := Seq("-Xss512M", "-Xmx4G", "-XX:MaxMetaspaceSize=768M")
-resolvers ++= Seq(
-  Resolver.mavenLocal,
-  MavenRepository("aliyun", "http://maven.aliyun.com/nexus/content/groups/public")
-)
+//scalafmtConfig in ThisBuild := file(s"file://${Path.userHome.getAbsolutePath}/.sbt/1.0/.scalafmt.conf")
+//ensimeRepositoryUrls in ThisBuild += "http://maven.aliyun.com/nexus/content/groups/public"
+//ensimeIgnoreScalaMismatch in ThisBuild := true
+//ensimeJavaFlags in ThisBuild := Seq("-Xss512M", "-Xmx4G", "-XX:MaxMetaspaceSize=768M")
+//resolvers ++= Seq(
+//  Resolver.mavenLocal,
+//  MavenRepository("aliyun", "http://maven.aliyun.com/nexus/content/groups/public")
+//)
 
-assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs@_*) => MergeStrategy.discard
-  case _ => MergeStrategy.first
-}
+//assemblyMergeStrategy in assembly := {
+//  case PathList("META-INF", xs@_*) => MergeStrategy.discard
+//  case _ => MergeStrategy.first
+//}
 
 lazy val log4jVersion = "2.11.0"
 lazy val scalazVersion = "7.2.20"
