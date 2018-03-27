@@ -10,4 +10,12 @@ My scala sample code while learning
 
 ## functional programming
 
+### fp.intro for Functional Data Structures
+ 
+- Lst : List Implementation
+- Strim : Stream Implementation
+- Tree: Tree Implementaion
+
+
+
 
