@@ -194,8 +194,8 @@ class ListSample {
     def loop(xs: Seq[(Int, Int)], target: Int, map: Map[Int, Int]): Option[(Int, Int)] = {
       xs match {
         case Nil => None
-        case x +: _ if x._1 < target && map.get(target - x._1).isDefined => Some((x._2, map(target - x._1)))
-        case x +: rs => loop(rs, target, map.+((x._1, x._2)))
+        case x +: _ if map.get(target - x._1).isDefined => Some((x._2, map(target - x._1)))
+        case x +: rs => loop(rs, target, map.+(x._1 -> x._2))
       }
     }
 
@@ -222,6 +222,7 @@ class ListSample {
     val seq = Seq(1, 2, 3, 5, 4, 4)
     twoSumByMap(seq, target).ensuring(opt => opt.exists(pair => seq(pair._1) + seq(pair._2) == target))
     twoSumBySort(seq, target).ensuring(opt => opt.exists(pair => seq(pair._1) + seq(pair._2) == target))
+    assert(twoSumByMap(Seq(0, 4, 3, 0), 0).isDefined)
+    assert(twoSumByMap(Seq(-3, 4, 3, 90), 0).isDefined)
   }
-
 }

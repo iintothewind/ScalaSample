@@ -80,9 +80,20 @@ class MonoidSample {
     p1 && p2
   }
 
+  def flip[A](m: Monoid[A]): Monoid[A] = new Monoid[A] {
+    override def zero: A = m.zero
+
+    override def op(a1: A, a2: A): A = m.op(a2, a1)
+  }
+
   def concat[A](as: Seq[A], monoid: Monoid[A]): A = as.foldLeft(monoid.zero)(monoid.op)
 
   def foldMap[A, B](as: Seq[A], monoid: Monoid[B])(f: A => B): B = concat(as.map(f), monoid)
+
+  def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B): B = foldMap(as, endoCompose[B])(f.curried)(z)
+
+  // use foldMap to implement foldLeft, we need flip() to change the traverse order
+  def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B = foldMap(as, flip(endoCompose[B]))(a => b => f(b, a))(z)
 
   @junit.Test
   def testMonoid(): Unit = {
@@ -120,6 +131,12 @@ class MonoidSample {
     val words: List[String] = List("Hic", "Est", "Index")
     assert(words.foldLeft(stringMonoid.zero)(stringMonoid.op) == words.foldRight(stringMonoid.zero)(stringMonoid.op))
     assert(words.foldLeft("")(_ + _) == words.foldRight("")(_ + _))
+  }
+
+  @junit.Test
+  def testFold(): Unit = {
+    println(foldLeft(List(1, 2, 3, 4))(List.empty[String])((s, i) => i.toString :: s))
+    println(foldRight(List(1, 2, 3, 4))(List.empty[String])((i, s) => i.toString :: s))
   }
 
 }
