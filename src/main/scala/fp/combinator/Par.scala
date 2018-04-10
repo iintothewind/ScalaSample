@@ -80,13 +80,13 @@ object Par {
 
   def map[A, B](async: Async[A])(f: A => Try[B]): Async[B] = map2(async, unit(Try(Unit)))((a, _) => f(a))
 
-  def sortPar(al: Async[List[Int]]): Async[List[Int]] = map(al)(xs => Try(xs.sorted))
+  def sortPar(al: Async[Seq[Int]]): Async[Seq[Int]] = map(al)(xs => Try(xs.sorted))
 
-  def sequence[A](la: List[Async[A]]): Async[List[A]] = la.foldRight[Async[List[A]]](unit(Try(List.empty[A])))((h, t) => map2(h, t)((x, xs) => Try(x :: xs)))
+  def sequence[A](la: Seq[Async[A]]): Async[Seq[A]] = la.foldRight[Async[Seq[A]]](unit(Try(Seq.empty[A])))((h, t) => map2(h, t)((x, xs) => Try(x +: xs)))
 
-  def parMap[A, B](xs: List[A])(f: A => Try[B]): Async[List[B]] = fork(sequence(xs.map(async(f))))
+  def parMap[A, B](xs: Seq[A])(f: A => Try[B]): Async[Seq[B]] = fork(sequence(xs.map(async(f))))
 
-  def parFilter[A](xs: List[A])(f: A => Try[Boolean]): Async[List[A]] = parMap(xs.filter(f.andThen(_.getOrElse(true))))(a => Try(identity(a)))
+  def parFilter[A](xs: Seq[A])(f: A => Try[Boolean]): Async[Seq[A]] = parMap(xs.filter(f.andThen(_.getOrElse(true))))(a => Try(identity(a)))
 
   def chooser[A, B](a: Async[A])(choose: A => Async[B]): Async[B] = es => choose(run(es)(a).get)(es)
 
