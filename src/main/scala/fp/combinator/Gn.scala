@@ -40,19 +40,24 @@ object Gn {
     case false => r
   }
 
-  def weighted[A](l: (Gn[A], Double), r: (Gn[A], Double)): Gn[A] = randDbl.flatMap(d => if (d < (l._2 / (l._2 + r._2))) l._1 else r._1)
+  def weighted[A](l: (Gn[A], Double), r: (Gn[A], Double)): Gn[A] =
+    randDbl.flatMap(d => if (d < (l._2 / (l._2 + r._2))) l._1 else r._1)
 
   def oneOf[A](source: Gn[IndexedSeq[A]]): Gn[A] = source.flatMap(xs => Gn.between(0, xs.size).map(xs(_)))
 
   def oneOfIn[A](source: A*): Gn[A] = oneOf(const(IndexedSeq(source: _*)))
 
-  def randSeq[A](source: Gn[IndexedSeq[A]])(implicit len: Gn[Int] = source.map(_.length)): Gn[Seq[A]] = oneOf(source).many(len)
+  def randSeq[A](source: Gn[IndexedSeq[A]])(implicit len: Gn[Int] = source.map(_.length)): Gn[Seq[A]] =
+    oneOf(source).many(len)
 
-  def randSeqIn[A](source: A*)(implicit len: Int = source.length): Gn[Seq[A]] = randSeq(const(IndexedSeq(source: _*)))
+  def randSeqIn[A](source: A*)(implicit len: Int = source.length): Gn[Seq[A]] =
+    randSeq(const(IndexedSeq(source: _*)))
 
-  def randStr(source: String, size: Gn[Int])(implicit len: Gn[Int] = const(source.length)): Gn[Seq[String]] = randSeq(Gn.const(source: IndexedSeq[Char]))(len).map(xs => String.valueOf(xs.toArray)).many(size)
+  def randStr(source: String, size: Gn[Int])(implicit len: Gn[Int] = const(source.length)): Gn[Seq[String]] =
+    randSeq(Gn.const(source: IndexedSeq[Char]))(len).map(xs => String.valueOf(xs.toArray)).many(size)
 
-  def randLetters(size: Gn[Int])(len: Gn[Int]): Gn[Seq[String]] = Gn.randStr("abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", size)(len)
+  def randLetters(size: Gn[Int])(len: Gn[Int]): Gn[Seq[String]] =
+    Gn.randStr("abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", size)(len)
 }
 
 

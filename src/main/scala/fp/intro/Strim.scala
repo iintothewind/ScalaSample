@@ -156,7 +156,8 @@ sealed trait Strim[+A] {
 
   def forall(p: A => Boolean): Boolean = foldRight(true)((element, result) => p(element) && result)
 
-  def takeWhile(p: A => Boolean): Strim[A] = foldRight(Strim.empty[A])((element, result) => if (p(element)) element #:: result else Nis)
+  def takeWhile(p: A => Boolean): Strim[A] = foldRight(Strim.empty[A])((element, result) =>
+    if (p(element)) element #:: result else Nis)
 
   def headOption: Option[A] = foldRight(None.asInstanceOf[Option[A]])((element, result) => Some(element))
 
@@ -164,7 +165,7 @@ sealed trait Strim[+A] {
 
   def flatMap[B](f: A => Strim[B]): Strim[B] = foldRight(Strim.empty[B])((element, result) => f(element) #::: result)
 
-  def filter(p: (A) => Boolean): Strim[A] = flatMap(x => if (p(x)) Strim(x) else Nis)
+  def filter(p: A => Boolean): Strim[A] = flatMap(x => if (p(x)) Strim(x) else Nis)
 
   def zipWith[B, C](that: Strim[B])(f: (A, B) => C): Strim[C] = Strim.unfold((this, that)) {
     case (l #:: lst, r #:: rst) => Some(f(l, r), (lst, rst))

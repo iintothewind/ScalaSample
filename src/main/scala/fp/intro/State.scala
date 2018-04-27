@@ -3,10 +3,11 @@ package fp.intro
 import scala.annotation.tailrec
 
 case class State[S, +A](run: S => (A, S)) {
-  def flatMap[U >: A, B](f: U => State[S, B]): State[S, B] = State(state => {
-    val (a, nst) = this.run(state)
-    f(a).run(nst)
-  })
+  def flatMap[U >: A, B](f: U => State[S, B]): State[S, B] =
+    State(state => {
+      val (a, nst) = this.run(state)
+      f(a).run(nst)
+    })
 
   def map[B](f: A => B): State[S, B] = flatMap[A, B](a => State.unit(f(a)))
 
@@ -33,7 +34,8 @@ object State {
 
   def map[S, A, B](s: State[S, A])(f: A => B): State[S, B] = flatMap(s)(a => unit(f(a)))
 
-  def map2[S, A, B, C](ra: State[S, A], rb: State[S, B])(f: (A, B) => C): State[S, C] = flatMap(ra)(a => map(rb)(b => f(a, b)))
+  def map2[S, A, B, C](ra: State[S, A], rb: State[S, B])(f: (A, B) => C): State[S, C] =
+    flatMap(ra)(a => map(rb)(b => f(a, b)))
 
   def many[S, A](xs: State[S, A]*): State[S, Seq[A]] = State(initState => {
     @tailrec

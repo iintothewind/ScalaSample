@@ -114,6 +114,7 @@ object SimpleParser extends Parsers[Parser] {
     }
   }
 
-  override def run[A](p: Parser[A])(input: String): Either[ParseError, A] = p(ParserState(Location(input))).extract
+  override def run[A](p: Parser[A])(input: String): Either[ParseError, A] =
+    p(ParserState(Location(input))).extract
 }
 

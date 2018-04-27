@@ -1,7 +1,7 @@
 package fp.combinator
 
-import scala.util.Either
 import scala.language.{higherKinds, implicitConversions}
+import scala.util.Either
 
 sealed case class ParseError(stack: List[(Location, String)] = List()) {
   def push(location: Location, msg: String): ParseError = copy(stack = (location, msg) :: stack)
@@ -65,7 +65,8 @@ trait Parsers[Parser[+ _]] { self =>
   // to avoid stackoverflow, do not use: or(map2(p, many(p))(_ :: _), succeed(List()))
   def many[A](p: Parser[A]): Parser[List[A]]
 
-  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] = if (n <= 0) succeed(Nil) else map2(p, listOfN(n - 1, p))(_ :: _)
+  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
+    if (n <= 0) succeed(Nil) else map2(p, listOfN(n - 1, p))(_ :: _)
 
   def repeat[A](p: Parser[A]): Parser[List[A]] = map2(p, many(p))(_ :: _)
 

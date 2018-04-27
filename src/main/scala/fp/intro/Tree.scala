@@ -8,7 +8,8 @@ import scala.collection.immutable.Queue
 sealed abstract class Tree[A](lc: Option[Tree[A]], v: Option[A], rc: Option[Tree[A]]) {
   override def toString: String = this match {
     case Leaf(a) => s"Leaf($a)"
-    case Branch(optl, a, optr) => s"Branch(${if (optl.nonEmpty) optl.get.toString else "None"}, Some($a), ${if (optr.nonEmpty) optr.get.toString else "None"})"
+    case Branch(optl, a, optr) =>
+      s"Branch(${optl.map(_.toString).getOrElse("None")}, Some($a), ${optr.map(_.toString).getOrElse("None")})"
   }
 
   def size: Int = {

@@ -66,21 +66,25 @@ object Opt {
 
   def lift[A, B](f: A => B): Opt[A] => Opt[B] = _.map(f)
 
-  def sequence[A](xs: List[Opt[A]]): Opt[List[A]] = xs.foldRight(Opt(List.empty[A]))((x, result) => (x, result) match {
-    case (Sme(a), Sme(lst)) => Sme(a :: lst)
-    case _ => Non
-  }).flatMap {
-    case lst@_ :: _ => Sme(lst)
-    case _ => Non
-  }
+  def sequence[A](xs: List[Opt[A]]): Opt[List[A]] =
+    xs.foldRight(Opt(List.empty[A]))((x, result) =>
+      (x, result) match {
+        case (Sme(a), Sme(lst)) => Sme(a :: lst)
+        case _ => Non
+      })
+      .flatMap {
+        case lst@_ :: _ => Sme(lst)
+        case _ => Non
+      }
 
   def traverse[A, B](xs: List[A])(f: A => B): Opt[List[B]] = {
     @tailrec
-    def loop(xs: List[A], traversed: List[B])(f: A => B): Opt[List[B]] = (xs, traversed) match {
-      case (x :: rs, lst) if Opt(x).map(f).isDefined => loop(rs, f(x) :: lst)(f)
-      case (Nil, lst) if lst.nonEmpty => Sme(lst.reverse)
-      case _ => Non
-    }
+    def loop(xs: List[A], traversed: List[B])(f: A => B): Opt[List[B]] =
+      (xs, traversed) match {
+        case (x :: rs, lst) if Opt(x).map(f).isDefined => loop(rs, f(x) :: lst)(f)
+        case (Nil, lst) if lst.nonEmpty => Sme(lst.reverse)
+        case _ => Non
+      }
     loop(xs, List.empty[B])(f)
   }
 }

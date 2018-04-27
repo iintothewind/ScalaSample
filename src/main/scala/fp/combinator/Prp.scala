@@ -36,26 +36,35 @@ sealed case class Prp(run: (Int, Rng) => Result) {
 
 object Prp {
   def forAll[A](gn: Gn[A])(f: A => Boolean): Prp = Prp((size: Int, rng: Rng) =>
-    gn.many(Gn.const(size)).map(seq => seq.map(a => (a, Try(f(a))))).sample(rng).find {
-      case (a, Success(false)) => true
-      case (a, Failure(e)) => true
-      case _ => false
-    }.map {
-      case (a, Success(false)) => Fail(a)
-      case (a, Failure(e)) => Exception(a, e)
-      case _ => Pass()
-    }.getOrElse(Pass())
+    gn.many(Gn.const(size))
+      .map(seq => seq.map(a => (a, Try(f(a)))))
+      .sample(rng)
+      .find {
+        case (a, Success(false)) => true
+        case (a, Failure(e)) => true
+        case _ => false
+      }
+      .map {
+        case (a, Success(false)) => Fail(a)
+        case (a, Failure(e)) => Exception(a, e)
+        case _ => Pass()
+      }.getOrElse(Pass())
   )
 
   def throws[A, T <: Throwable](c: Class[T], gn: Gn[A])(f: A => Boolean): Prp = Prp((size: Int, rng: Rng) =>
-    gn.many(Gn.const(size)).map(seq => seq.map(a => (a, Try(f(a))))).sample(rng).find {
-      case (_, Success(_)) => true
-      case (_, Failure(e)) if !c.isInstance(e) => true
-      case _ => false
-    }.map {
-      case (a, Success(_)) => Fail(a)
-      case (a, Failure(e)) => Exception(a, e)
-      case _ => Pass()
-    }.getOrElse(Pass())
+    gn
+      .many(Gn.const(size))
+      .map(seq => seq.map(a => (a, Try(f(a)))))
+      .sample(rng)
+      .find {
+        case (_, Success(_)) => true
+        case (_, Failure(e)) if !c.isInstance(e) => true
+        case _ => false
+      }
+      .map {
+        case (a, Success(_)) => Fail(a)
+        case (a, Failure(e)) => Exception(a, e)
+        case _ => Pass()
+      }.getOrElse(Pass())
   )
 }
