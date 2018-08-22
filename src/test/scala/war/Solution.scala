@@ -68,13 +68,4 @@ class Solution {
     foldl(buffer.sorted.reverse: _*)
   }
 
-  def myPow(x: Double, n: Int): Double = {
-    math.pow(x, n)
-  }
-
-  def lengthOfLongestSubstring(s: String): Int = {
-    0
-
-  }
-
 }

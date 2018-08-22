@@ -46,8 +46,11 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % scalazVersion,
   "org.scalaz" %% "scalaz-concurrent" % scalazVersion,
   "com.google.guava" % "guava" % "24.0-jre",
-  "org.scala-lang.modules" %% "scala-xml" % "1.1.0" % Test,
+  "org.scalikejdbc" %% "scalikejdbc" % "3.3.0",
+  "org.scalikejdbc" %% "scalikejdbc-config" % "3.3.0",
+  "com.h2database" % "h2" % "1.4.197",
   "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "junit" % "junit" % "4.12" % Test,
   "com.novocode" % "junit-interface" % "0.11" % Test,
 )
