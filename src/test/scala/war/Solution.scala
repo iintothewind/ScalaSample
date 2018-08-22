@@ -68,4 +68,26 @@ class Solution {
     foldl(buffer.sorted.reverse: _*)
   }
 
+
+  def reverse(x: Int): Int = x.toLong match {
+    case b if b == 0L || b > Int.MaxValue => 0
+    case a if a > 0 => a.toString.reverse.dropWhile(_ == '0').toLong match {
+      case m if m > Int.MaxValue => 0
+      case n => n.toInt
+    }
+    case c => ('-' +: c.toString.reverse.filterNot(_ == '-').dropWhile(_ == '0') match {
+      case m if m.toLong < Int.MinValue => "0"
+      case n => n
+    }).toInt
+  }
+
+  @Test
+  def testReverse(): Unit = {
+    println(reverse(120))
+    println(reverse(123))
+    println(reverse(0))
+    println(reverse(-123))
+    println(reverse(1534236469))
+    println(reverse(-2147483648))
+  }
 }

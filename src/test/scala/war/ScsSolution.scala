@@ -45,8 +45,6 @@ class ScsSolution {
       case Some(x +: Nil) => x
       case _ => ""
     }
-
-
   }
 
   @Test

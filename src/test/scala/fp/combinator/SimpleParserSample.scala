@@ -16,7 +16,7 @@ class SimpleParserSample {
     SimpleParser.run(char('a'))("a").ensuring(_ == Right('a'))
     SimpleParser.run(char('a'))("ab").ensuring(_ == Right('a'))
     SimpleParser.run(char('a'))("bc").ensuring(_ match {
-      case Left(ParseError((List((Location("bc", 0), _))))) => true
+      case Left(ParseError(List((Location("bc", 0), _)))) => true
       case _ => false
     })
   }

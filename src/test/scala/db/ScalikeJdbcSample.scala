@@ -4,7 +4,12 @@ import org.scalatest._
 import scalikejdbc._
 import scalikejdbc.config.{DBs, DBsWithEnv}
 
-class ScalikeJdbcSample extends Matchers with FlatSpecLike with BeforeAndAfterEachTestData with BeforeAndAfterAll with BeforeAndAfterEach {
+class ScalikeJdbcSample
+  extends Matchers
+    with FlatSpecLike
+    with BeforeAndAfterEachTestData
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach {
   implicit val session: AutoSession = AutoSession
 
   override def beforeAll(): Unit = {
