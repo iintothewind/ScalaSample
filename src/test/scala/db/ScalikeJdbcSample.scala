@@ -35,12 +35,7 @@ class ScalikeJdbcSample
     }
   }
 
-  "Sqlike" should "be able to select " in new Builder {
-    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
-    entities.foreach(println)
-  }
-
-  it should "be able to select with parameters" in new Builder {
+  "Sqlike" should "be able to select with parameters" in new Builder {
     val table = sqls"members"
     val name = "Bob"
     val m = sql"select * from $table where name = $name ".map(_.toMap()).single().apply().getOrElse(Map.empty)
