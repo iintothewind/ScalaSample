@@ -85,7 +85,7 @@ object Rng {
   def nextInt: Rand[Int] = State(_.nextInt)
 
   def nextNonNegativeInt: Rand[Int] = map(nextInt) {
-    case v if v < 0 => -(v + 1)
+    case v if v < 0 => -v
     case otherwise => otherwise
   }
 

@@ -58,9 +58,9 @@ class StateSample {
 
   @Test
   def testFlatMaps(): Unit = {
-    val ns = Rng.nextInt(99).flatMap[Int, Seq[Int]](x =>
+    val ns: State[Rng, Seq[Int]] = Rng.nextInt(99).flatMap[Int, Seq[Int]](x =>
       Rng.nextInt(9).flatMap[Int, Seq[Int]](y =>
-        Rng.many(Seq.fill(9)(Rng.nextInt(x)): _*).map(xs => xs.map(_ % (y + 1)))
+        Rng.many(Seq.fill(9)(Rng.nextInt(x + 1)): _*).map(xs => xs.map(_ % (y + 1)))
       )
     )
     println(ns.run(Rng(0)))
@@ -70,7 +70,7 @@ class StateSample {
   def testForComprehensions(): Unit = {
     val ns = for {x: Int <- Rng.nextInt(99)
                   y: Int <- Rng.nextInt(9)
-                  xs <- Rng.many(Seq.fill(9)(Rng.nextInt(x)): _*)} yield xs.map(_ % (y + 1))
+                  xs <- Rng.many(Seq.fill(9)(Rng.nextInt(x + 1)): _*)} yield xs.map(_ % (y + 1))
     println(ns.run(Rng(0)))
   }
 
