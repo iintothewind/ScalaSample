@@ -2,11 +2,12 @@ package basic.collects.basic
 
 import java.util
 
+import fp.intro.Generator
 import org.junit.Test
 
 import scala.collection.immutable.TreeMap
 import scala.collection.{immutable, mutable}
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 
 class MapSample {
   @Test
@@ -65,7 +66,17 @@ class MapSample {
 
   @Test
   def testWordCounting(): Unit = {
-    Source.fromFile("README.md").getLines().flatMap(_.split("[ ,.!;]+"))
+    //    val buffer: BufferedSource = Source.fromFile("README.md")
+    //    buffer.getLines()
+    //      .flatMap(_.split("[ ,.!;]+"))
+    //      .foldLeft(Map.empty[String, Int])((map, word) => map.+(word -> (map.getOrElse(word, 0) + 1)))
+    //      .toList.sortBy(_._2)(Ordering[Int].reverse).foreach(println)
+    Generator
+      .selfClosing {
+        val buffer: BufferedSource = Source.fromFile("README.md")
+        (buffer.getLines(), () => buffer.close())
+      }
+      .flatMap(line => Generator(line.split("[ ,.!;]"): _*))
       .foldLeft(Map.empty[String, Int])((map, word) => map.+(word -> (map.getOrElse(word, 0) + 1)))
       .toList.sortBy(_._2)(Ordering[Int].reverse).foreach(println)
   }

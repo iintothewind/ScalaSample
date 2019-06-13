@@ -27,5 +27,6 @@ class PrpSample {
   def testThrows(): Unit = {
     Prp.forAll(Gn.between(-3, 3))(i => i / i == 1).check
     Prp.throws(classOf[ArithmeticException], Gn.const(0))(i => i / i == 1).check
+    Prp.throws(classOf[ArithmeticException], Gn.const(1))(i => i / i == 1).check
   }
 }
