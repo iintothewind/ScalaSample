@@ -75,14 +75,14 @@ class MapSample {
     val treeMap = TreeMap(1 -> "HK", 2 -> "TW", 3 -> "MC")(new Ordering[Int] {
       override def compare(x: Int, y: Int): Int = y - x
     })
-    treeMap.foreach(pair => println(pair._1 + " -> " + pair._2))
+    treeMap.foreach(pair => println(s"${pair._1}  -> ${pair._2}"))
   }
 
   @Test
   def syntacticSugar(): Unit = {
     var capital = Map("US" -> "Washington", "France" -> "Paris")
     capital += ("Japan" -> "Tokyo")
-    capital.foreach(pair => println(pair._1 + " -> " + pair._2))
+    capital.foreach(pair => println(s"${pair._1}  -> ${pair._2}"))
   }
 
 }

@@ -6,10 +6,10 @@ import scala.math.{E, Pi}
 
 class PatternsSample {
   def wildcardPattern(expr: Expr): Unit = expr match {
-    case BinOp(_, left: Num, right: Num) => println(expr + " is a binary operation.")
+    case BinOp(_, left: Num, right: Num) => println(s"$expr is a binary operation.")
     // variable name matters for pattern match, leftStr and rightStr cannot be changed to left and right
-    case BinOp(_, leftStr: Str, rightStr: Str) => println(expr + " is a binary operation for Str.")
-    case UnOp(_, _) => println(expr + " is a unary operation.")
+    case BinOp(_, leftStr: Str, rightStr: Str) => println(s"$expr is a binary operation for Str.")
+    case UnOp(_, _) => println(s"expr is a unary operation.")
     case _ =>
   }
 
@@ -65,7 +65,7 @@ class PatternsSample {
   }
 
   def tuplePatternWithGuard(any: Any): String = any match {
-    case (a, "a", c) if a.isInstanceOf[String] && c.isInstanceOf[String] => a + "a" + c
+    case (a, "a", c) if a.isInstanceOf[String] && c.isInstanceOf[String] => s"$a a $c"
     case (a, b, c, d) if a.isInstanceOf[Int] && b.isInstanceOf[Int] && c.isInstanceOf[Int] && d.isInstanceOf[Int] => (a.asInstanceOf[Int] + b.asInstanceOf[Int] + c.asInstanceOf[Int] + d.asInstanceOf[Int]).toString
     case (1, b, c, d, e) if b == 0 && c == 0 && d == 0 && e == 0 => "1"
     case other => other.toString

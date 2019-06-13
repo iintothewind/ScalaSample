@@ -2,8 +2,6 @@ package basic.collects.lists
 
 import org.junit.Test
 
-import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
 import scala.language.postfixOps
 
 class HighOrderOperations {
@@ -31,10 +29,6 @@ class HighOrderOperations {
     val list = List("the", "quick", "brown", "fox", "jump", "over", "the", "lazy", "dog")
     val map = list.collect({
       case word if word.length > 4 => (word, word.length)
-    })(new CanBuildFrom[List[String], (String, Int), Map[String, Int]] {
-      override def apply(from: List[String]) = apply()
-
-      override def apply() = Map.newBuilder[String, Int]
     })
     assert(Map("quick" -> 5, "brown" -> 5) == map)
   }
@@ -45,7 +39,9 @@ class HighOrderOperations {
       println(s"calc $x in ${Thread.currentThread().getName}")
       x * 2
     }
-    List(1, 2, 3, 4, 5, 6, 7, 8, 9, 0).par.map(doIt)
+    // import scala.collection.parallel.CollectionConverters._
+    // scala-parallel-collections should be imported before par can be used
+    // List(1, 2, 3, 4, 5, 6, 7, 8, 9, 0).par.map(doIt);
   }
 
   @Test
@@ -93,34 +89,48 @@ class HighOrderOperations {
     assert(List(-1, 0, 1).exists(_ > 0))
   }
 
+  /**
+    * deprecated
+    */
   @Test
   def leftFolding(): Unit = {
     // left folding :/ is an operator of TraversableOnce,
     // it takes a start value in the first parameter entrance,
     // and a binary op closure in the second parameter entrance
     // the result of left folding is the nested result of operation between start value and the elements of list from start to end.
-    assert(List(1, 2, 3).sum == (0 /: List(1,2,3))(_+_))
-    assert((0 /: List(1,2,3))(_+_) == List(1, 2, 3).foldLeft(0)(_ + _))
-    assert(Seq(1, 2, 3).foldLeft(0)(_ + _) == Seq(1, 2, 3).reverse.foldRight(0)(_ + _))
+    //    assert(List(1, 2, 3).sum == (0 /: List(1, 2, 3)) (_ + _))
+    //    assert((0 /: List(1, 2, 3)) (_ + _) == List(1, 2, 3).foldLeft(0)(_ + _))
+    //    assert(Seq(1, 2, 3).foldLeft(0)(_ + _) == Seq(1, 2, 3).reverse.foldRight(0)(_ + _))
   }
 
+  /**
+    * deprecated
+    */
   @Test
   def rightFolding(): Unit = {
-    assert(List(1, 2, 3).product == (List(1,2,3) :\ 1)(_ * _))
-    assert((List(1,2,3) :\ 1)(_ *_) == List(1, 2, 3).foldRight(1)(_ * _))
+    //    assert(List(1, 2, 3).product == (List(1, 2, 3) :\ 1) (_ * _))
+    //    assert((List(1, 2, 3) :\ 1) (_ * _) == List(1, 2, 3).foldRight(1)(_ * _))
   }
 
+  /**
+    * deprecated
+    */
   @Test
   def reverseByLeftFolding(): Unit = {
-    def reverse(list: List[Int]) = (List.empty[Int] /: list)((foldingList, element) => element :: foldingList)
-    assert(List(3, 2, 1) == reverse(List(1, 2, 3)))
+    //    def reverse(list: List[Int]) = (List.empty[Int] /: list) ((foldingList, element) => element :: foldingList)
+    //
+    //    assert(List(3, 2, 1) == reverse(List(1, 2, 3)))
   }
 
+  /**
+    * deprecated
+    */
   @Test
   def reverseByRightFolding(): Unit = {
-    def reverse(list: List[Int]) = (list :\ List.empty[Int])((element, foldingList) => foldingList ::: List(element))
-    println(reverse(List(1, 2, 3)))
-    assert(List(3, 2, 1) == reverse(List(1, 2, 3)))
+    //    def reverse(list: List[Int]) = (list :\ List.empty[Int]) ((element, foldingList) => foldingList ::: List(element))
+    //
+    //    println(reverse(List(1, 2, 3)))
+    //    assert(List(3, 2, 1) == reverse(List(1, 2, 3)))
   }
 
   @Test

@@ -9,6 +9,14 @@ class Solution {
     nums.toSet.size
   }
 
+  @Test
+  def testMaxProfit(): Unit = {
+    assert(maxProfit(Array(1, 2)) == 1)
+    assert(maxProfit(Array(1, 4, 2)) == 3)
+    assert(maxProfit(Array(3, 2, 6, 5, 0, 3)) == 7)
+    assert(maxProfit(Array(100, 180, 260, 310, 40, 535, 695)) == 865)
+  }
+
   def maxProfit(prices: Array[Int]): Int = {
     def loop(profit: Int, lowest: Int, highest: Int, xs: List[Int]): Int = {
       xs match {
@@ -22,19 +30,6 @@ class Solution {
       case Some(xs) if xs.size > 1 => loop(0, xs.head, xs.head, xs.tail)
       case _ => 0
     }
-  }
-
-  @Test
-  def testMaxProfit(): Unit = {
-    assert(maxProfit(Array(1, 2)) == 1)
-    assert(maxProfit(Array(1, 4, 2)) == 3)
-    assert(maxProfit(Array(3, 2, 6, 5, 0, 3)) == 7)
-    assert(maxProfit(Array(100, 180, 260, 310, 40, 535, 695)) == 865)
-  }
-
-  class ListNode(var _x: Int = 0) {
-    var next: ListNode = null
-    var x: Int = _x
   }
 
   def foldl(lst: Int*): ListNode = lst.foldLeft(null: ListNode)((node, i) => {
@@ -65,9 +60,18 @@ class Solution {
     for (node <- lists) {
       buffer ++= unfold(node)(n => Option(n).map(nd => (nd.x, nd.next)))
     }
-    foldl(buffer.sorted.reverse: _*)
+    foldl(buffer.sorted.reverse.toSeq: _*)
   }
 
+  @Test
+  def testReverse(): Unit = {
+    println(reverse(120))
+    println(reverse(123))
+    println(reverse(0))
+    println(reverse(-123))
+    println(reverse(1534236469))
+    println(reverse(-2147483648))
+  }
 
   def reverse(x: Int): Int = x.toLong match {
     case b if b == 0L || b > Int.MaxValue => 0
@@ -81,13 +85,33 @@ class Solution {
     }).toInt
   }
 
-  @Test
-  def testReverse(): Unit = {
-    println(reverse(120))
-    println(reverse(123))
-    println(reverse(0))
-    println(reverse(-123))
-    println(reverse(1534236469))
-    println(reverse(-2147483648))
+  //  def findMedianSortedArrays(nums1: Array[Int], nums2: Array[Int]): Double = {
+  //    def median(arr1: Array[Int], arr2: Array[Int]): Double = Array.concat(arr1, arr2).splitAt((arr1.length + arr2.length) / 2) match {
+  //      case (l, r) if l.length < r.length => r.head.toDouble
+  //      case (l, r) if l.length == r.length => (l.last.toDouble + r.head.toDouble) / 2D
+  //      case _ => 0D
+  //    }
+  //
+  //    def loop(arr1: Array[Int], arr2: Array[Int]): Double = (arr1, arr2) match {
+  //      case (Array(), Array()) => 0D
+  //      case (Array(i), Array()) => i.toDouble
+  //      case (Array(i), b@Array(_)) => val (l, r) = b.span(n => n <= i); median(l :+ i, r)
+  //      case (Array(), Array(i)) => i.toDouble
+  //      case (a@Array(_), Array(i)) => val (l, r) = a.span(n => n <= i); median(l :+ i, r)
+  //      case (Array(a), Array(b)) => (a.toDouble + b.toDouble) / 2
+  //      case (a, b) if a.last <= b.head => median(a, b)
+  //      case (a, b) if a.head >= b.last => median(b, a)
+  //      case (a, b) if a.length > 1 && b.length > 1 && a.head <= b.head => loop(a.splitAt(1)._2, b.dropWhile(n => n <= a.head))
+  //      case (a, b) if a.length > 1 && b.length > 1 && a.last >= b.last => loop(a.splitAt(1)._2, b.splitAt(1)._2)
+  //
+  //    }
+  //
+  //
+  //  }
+
+  class ListNode(var _x: Int = 0) {
+    var next: ListNode = null
+    var x: Int = _x
   }
+
 }

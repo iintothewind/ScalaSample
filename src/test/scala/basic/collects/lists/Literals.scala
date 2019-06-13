@@ -60,8 +60,8 @@ class Literals {
 
   @Test
   def zipped(): Unit = {
-    assert(List(20, 60) == (List(10, 20), List(2, 3, 4)).zipped.map(_ * _))
-    assert((List("abc", "de"), List(3, 2)).zipped.forall(_.length == _))
+    assert(List(20, 60) == List(10, 20).lazyZip(List(2, 3, 4)).map(_ * _))
+    assert(List("abc", "de").lazyZip(List(3, 2)).forall(_.length == _))
   }
 
 }

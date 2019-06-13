@@ -15,30 +15,31 @@ class ScalikeJdbcSample
   override def beforeAll(): Unit = {
     DBs.loadGlobalSettings()
     DBsWithEnv("scalikejdbc.env.dev").setupAll()
-    sql"""
+    SQL(
+      """
     create table members (
       id serial not null primary key,
       name varchar(64),
       created_at timestamp not null
     )
-    """.execute.apply()
+    """).execute.apply()
   }
 
   override def afterAll(): Unit = {
-    sql"drop table members".execute().apply()
+    SQL("drop table members").execute().apply()
     DBs.closeAll()
   }
 
   trait Builder {
     Seq("Alice", "Bob", "Chris") foreach { name =>
-      sql"insert into members (name, created_at) values ($name, current_timestamp)".update.apply()
+      SQL("insert into members (name, created_at) values ($name, current_timestamp)").update.apply()
     }
   }
 
   "Sqlike" should "be able to select with parameters" in new Builder {
-    val table = sqls"members"
+    val table = "members"
     val name = "Bob"
-    val m = sql"select * from $table where name = $name ".map(_.toMap()).single().apply().getOrElse(Map.empty)
+    val m = SQL("select * from $table where name = $name ").map(_.toMap()).single().apply().getOrElse(Map.empty)
     println(m)
   }
 

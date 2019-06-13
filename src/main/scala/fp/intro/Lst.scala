@@ -82,7 +82,7 @@ sealed trait Lst[+A] {
 
   def filter(p: A => Boolean): Lst[A] = this.flatMap(x => if (p(x)) Lst(x) else Nls)
 
-  def foreach[B](f: A => B): Unit = this.foldLeft(Unit.asInstanceOf[B])((_, x) => f(x))
+  def foreach[B](f: A => B): Unit = this.foldLeft(().asInstanceOf[B])((_, x) => f(x))
 
   def zip[B](bs: Lst[B]): Lst[(A, B)] = {
     @tailrec

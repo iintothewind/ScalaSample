@@ -1,8 +1,9 @@
 package fp.intro
 
 import org.junit.Test
-import scala.math.abs
+
 import scala.annotation.tailrec
+import scala.math.abs
 
 object Hof {
   def absolute(n: Int): Int = if (n < 0) -n else n
@@ -83,7 +84,7 @@ class HofSample {
 
   @Test
   def testFindFirst(): Unit = {
-    assert(0 == Hof.findFirst(Array("apple", "pear", "orange"))(_.contains("pp")))
+    assert(0 == Hof.findFirst(Array("apple", "pear", "orange").toSeq)(_.contains("pp")))
   }
 
   @Test

@@ -10,7 +10,7 @@ class SymbolLiteral {
 
   @Test
   def showSymbolLiteral(): Unit = {
-    updateRecordByName('favoriteAlbum, "OK Parameter")
+    updateRecordByName(Symbol("favoriteAlbum"), "OK Parameter")
   }
 
 }

@@ -146,7 +146,7 @@ trait Generator[+A] {
 
   def toArray[B >: A : ClassTag]: Array[B] = toBuffer.toArray
 
-  def toSeq: Seq[A] = toBuffer
+  def toSeq: Seq[A] = toBuffer.toSeq
 
   def toList: List[A] = toBuffer.toList
 
@@ -231,10 +231,10 @@ object Generator {
 
   def apply[T](xs: T*): Generator[T] = from(xs)
 
-  implicit def from[M[_], T](t: M[T])(implicit convert: (M[T] => TraversableOnce[T])): Generator[T] = new Generator[T] {
+  implicit def from[M[_], T](t: M[T])(implicit convert: M[T] => IterableOnce[T]): Generator[T] = new Generator[T] {
     def generate(f: T => Generator.Action): Action = {
       var last: Generator.Action = Generator.Continue
-      val iterator = convert(t).toIterator
+      val iterator = convert(t).iterator
 
       while (last == Generator.Continue && iterator.hasNext) {
         last = f(iterator.next())

@@ -32,13 +32,13 @@ package object stateful {
     //an initializer = _ of a field assigns a zero value to that field
     var celsius: Float = _
 
+    override def toString: String = s"$fahrenheit  F/ $celsius C"
+
     def fahrenheit: Float = celsius * 9 / 5 + 32
 
-    def fahrenheit_=(f: Float) {
+    def fahrenheit_=(f: Float): Unit = {
       celsius = (f - 32) * 5 / 9
     }
-
-    override def toString: String = fahrenheit + " F/" + celsius + " C"
   }
 
 }

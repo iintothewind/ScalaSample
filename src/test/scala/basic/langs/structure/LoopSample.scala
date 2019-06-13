@@ -4,7 +4,6 @@ import java.io.File
 
 import org.junit.Test
 
-import scala.collection.generic.CanBuildFrom
 import scala.io.Source
 
 
@@ -118,10 +117,6 @@ class LoopSample {
     }
     val collected = books.collect({
       case book if book.authors.exists(_.startsWith("Gosling")) => book.title -> book
-    })(new CanBuildFrom[List[Book], (String, Book), Map[String, Book]] {
-      override def apply(from: List[Book]) = apply()
-
-      override def apply() = Map.newBuilder[String, Book]
     })
     println(collected)
     assert(mapped == yielded)

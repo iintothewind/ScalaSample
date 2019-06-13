@@ -76,24 +76,10 @@ class ApplicationScenarios {
       if (poorOrdering.apply(first, maxRest)) first else maxRest
   }
 
-  /**
-   * <% is an deprecated operator
-   * T <% Ordered[T] means I can use any T, so long as T can be treated as an Ordered[T]
-   */
-  def viewBoundMax[T <% Ordered[T]](list: List[T]): T = list match {
-    case Nil => null.asInstanceOf[T]
-    case List(x) => x
-    case first :: rest =>
-      val maxRest = viewBoundMax(rest)
-      if (first > maxRest) first else maxRest
-  }
-
-
   @Test
   def testMax(): Unit = {
     val list = List(IdPig(1), IdPig(2), IdPig(3))
     assert(3 == orderedMax(list).id)
-    assert(3 == viewBoundMax(list).id)
     assert(3 == implicitMax(list).id)
     assert(1 == implicitMax(list)(Ordering[IdPig].reverse).id)
     assert(3 == poorStyleMax(list).id)

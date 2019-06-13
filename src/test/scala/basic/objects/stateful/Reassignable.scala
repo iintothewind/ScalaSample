@@ -11,12 +11,12 @@ class Reassignable {
     val selfTime = new SelfTime
     selfTime.hour = 9
     selfTime.minute = 30
-    println(selfTime.hour + ":" + selfTime.minute)
+    println(s"${selfTime.hour} : ${selfTime.minute}")
     val customTime = new CustomTime
     customTime.hour_=(12)
     customTime.hour = 16
     customTime.minute = 30
-    println(customTime.hour + ":" + customTime.minute)
+    println(s"${customTime.hour} : ${customTime.minute}")
   }
 
   @Test

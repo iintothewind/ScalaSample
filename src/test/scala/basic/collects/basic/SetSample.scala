@@ -25,7 +25,8 @@ class SetSample {
   def testDistinct(): Unit = {
     val base = immutable.Set.empty[String]
     val words = "See Spot Run. Run, Spot. Run!".split("[ !,.]+")
-    def distinct(words: Array[String]): immutable.Set[String] = (immutable.Set.empty[String] /: words)(_ + _)
+
+    def distinct(words: Array[String]): immutable.Set[String] = words.foldLeft(immutable.Set.empty[String])(_ + _)
     assert(Set("See", "Spot", "Run") == distinct(words))
     assert(Set("See", "Spot", "Run") == base ++ words)
   }

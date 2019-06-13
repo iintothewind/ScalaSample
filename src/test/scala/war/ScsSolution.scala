@@ -15,8 +15,8 @@ class ScsSolution {
     }
 
     (l, r) match {
-      case (a, b) if a.self.contains(b.self) => a
-      case (a, b) if b.self.contains(a.self) => b
+      case (a, b) if a.contains(b) => a
+      case (a, b) if b.contains(a) => b
       case it@_ => List(loop(it._1, it._2, 0), loop(it._2, it._1, 0)).minBy(_.length)
     }
   }
@@ -27,7 +27,6 @@ class ScsSolution {
       .filter(a => seq.filterNot(a == _).forall(!_.contains(a)))
       .permutations
       .toList
-      .par
       .map(sp => sp.foldLeft("")(overlap))
       .minBy(_.length)
   }

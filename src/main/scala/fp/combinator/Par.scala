@@ -78,7 +78,7 @@ object Par {
     }
   }
 
-  def map[A, B](async: Async[A])(f: A => Try[B]): Async[B] = map2(async, unit(Try(Unit)))((a, _) => f(a))
+  def map[A, B](async: Async[A])(f: A => Try[B]): Async[B] = map2(async, unit(Try(())))((a, _) => f(a))
 
   def sortPar(al: Async[Seq[Int]]): Async[Seq[Int]] = map(al)(xs => Try(xs.sorted))
 
