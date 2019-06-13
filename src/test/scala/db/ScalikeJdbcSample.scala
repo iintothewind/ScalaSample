@@ -32,14 +32,14 @@ class ScalikeJdbcSample
 
   trait Builder {
     Seq("Alice", "Bob", "Chris") foreach { name =>
-      SQL("insert into members (name, created_at) values ($name, current_timestamp)").update.apply()
+      SQL("insert into members (name, created_at) values (?, current_timestamp)").bind(name).update.apply()
     }
   }
 
   "Sqlike" should "be able to select with parameters" in new Builder {
     val table = "members"
     val name = "Bob"
-    val m = SQL("select * from $table where name = $name ").map(_.toMap()).single().apply().getOrElse(Map.empty)
+    val m = SQL("select * from members where name = ? ").bind(name).map(_.toMap()).single().apply().getOrElse(Map.empty)
     println(m)
   }
 
