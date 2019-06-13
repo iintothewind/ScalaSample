@@ -27,9 +27,7 @@ class HighOrderOperations {
   @Test
   def collect(): Unit = {
     val list = List("the", "quick", "brown", "fox", "jump", "over", "the", "lazy", "dog")
-    val map = list.collect({
-      case word if word.length > 4 => (word, word.length)
-    })
+    val map = list.collect({ case word if word.length > 4 => (word, word.length) }).toMap
     assert(Map("quick" -> 5, "brown" -> 5) == map)
   }
 

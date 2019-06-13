@@ -65,7 +65,7 @@ class PatternsSample {
   }
 
   def tuplePatternWithGuard(any: Any): String = any match {
-    case (a, "a", c) if a.isInstanceOf[String] && c.isInstanceOf[String] => s"$a a $c"
+    case (a, "a", c) if a.isInstanceOf[String] && c.isInstanceOf[String] => s"${a}a${c}"
     case (a, b, c, d) if a.isInstanceOf[Int] && b.isInstanceOf[Int] && c.isInstanceOf[Int] && d.isInstanceOf[Int] => (a.asInstanceOf[Int] + b.asInstanceOf[Int] + c.asInstanceOf[Int] + d.asInstanceOf[Int]).toString
     case (1, b, c, d, e) if b == 0 && c == 0 && d == 0 && e == 0 => "1"
     case other => other.toString

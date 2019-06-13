@@ -153,12 +153,12 @@ class QuickTour {
   trait RationalTrait {
     val numerArg: Int
     val denomArg: Int
+    private val g = gcd(numerArg, denomArg)
     require(denomArg != 0)
     val numerator: Int = numerArg / g
     val denominator: Int = denomArg / g
-    private val g = gcd(numerArg, denomArg)
 
-    override def toString: String = s"$numerator / $denominator"
+    override def toString: String = s"$numerator/$denominator"
 
     private def gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
   }
@@ -173,7 +173,7 @@ class QuickTour {
     val numerArg: Int
     val denomArg: Int
 
-    override def toString: String = s"$numerator / $denominator"
+    override def toString: String = s"$numerator/$denominator"
 
     private def gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
   }
