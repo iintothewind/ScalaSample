@@ -28,12 +28,7 @@ trait AfterB {
   println(introduction)
 }
 
-class BEvery(override val audience: String) extends {
-  override val introduction = {
-    println("Evaluating early def")
-    "Are you there?"
-  }
-} with B with AfterB {
+class BEvery(override val audience: String, override val introduction: String) extends B with AfterB {
   println("I repeat: Hello " + audience)
 }
 
@@ -76,10 +71,7 @@ class Location {
     */
   @Test
   def runPuzzleB(): Unit = {
-    new BEvery({
-      println("Evaluating param")
-      "Readers"
-    })
+    new BEvery("Readers", "this is a book intro")
   }
 
 }

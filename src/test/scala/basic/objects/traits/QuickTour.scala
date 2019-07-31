@@ -32,21 +32,12 @@ class QuickTour {
     }
   }
 
-  @Test
-  def preInitializeInAnonymousClass(): Unit = {
-    val rational = new {
-      val numerArg = 2
-      val denomArg = 6
-    } with RationalTrait
-    assert("1/3" == rational.toString)
-  }
-
+  /**
+    * early initializer is deprecated since 2.13, which should be replaced with trait parameter in 2.14
+    */
   @Test
   def preInitializeInSubclass(): Unit = {
-    class Rational(private[this] val n: Int, private[this] val d: Int) extends {
-      val numerArg = n
-      val denomArg = d
-    } with RationalTrait {
+    class Rational(override val numerArg: Int, override val denomArg: Int) extends RationalTrait {
       def +(that: Rational): Rational = new Rational(numerator * that.denominator + that.numerator * denominator, denominator * that.denominator)
 
       override def toString: String = super.toString
@@ -55,13 +46,16 @@ class QuickTour {
     assert("1/2" == (new Rational(1, 6) + new Rational(2, 6)).toString)
   }
 
+  /**
+    * early initializer is deprecated since 2.13, which should be replaced with trait parameter in 2.14
+    */
   @Test
   def preInitializeInObject(): Unit = {
-    object rational extends {
-      val numerArg = 2
-      val denomArg = 6
-    } with RationalTrait
-    assert("1/3" == rational.toString)
+    //    object rational extends {
+    //      val numerArg = 2
+    //      val denomArg = 6
+    //    } with RationalTrait
+    //    assert("1/3" == rational.toString)
   }
 
   @Test
